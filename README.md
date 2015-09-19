@@ -39,7 +39,7 @@ var App = module.exports = React.createClass({
   render: function() {
     return (
       <div id="application">
-        <AD path="your-code-from-doubleclick-for-publishers" />
+        <AD path="/network-code/ad-code" />
         <RouteHandler />
       </div>
     );
@@ -59,6 +59,28 @@ var App = module.exports = React.createClass({
 | mobileWidth| Integer   | true      | 480        |
 | media      | Boolean   | false     |            |
 | dimensions | Array     | false     |            |
+
+## Path
+
+Path is only one required parameter. The format is:
+/network-code/ad-code
+
+Example:
+
+```js
+/22222222/myad
+```
+
+## Network code
+
+You can find your network code in the Admin tab (Google DFP).
+This unique code is included in DFP tags to identify the network, ensuring that DFP looks in the correct network for line items that are targeted to a particular ad unit. It's displayed here to help you identify which network is associated with any DFP tags you have on your site.
+
+## Ad code
+
+You can find your ad code when you click on your ad in the Google DFP (Inventary tab)
+Identifies the ad unit in the associated ad tag. Ad unit codes can be up to 100 characters in length. Only letters, numbers, underscores, hyphens, periods, asterisks, forward slashes, backslashes, exclamations, left angle brackets, colons and parentheses are allowed. Each code must be unique; you can't reuse codes you've used before. Once you've created the ad unit, you can't change the code.
+
 
 ## Formats
 
