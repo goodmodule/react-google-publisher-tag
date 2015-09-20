@@ -2,8 +2,9 @@
 
 ## Motivation
 
-I needed to show adsense via google publisher tag in my react isomorphic application
-
+I needed to show adsense via google publisher tag in my react isomorphic application.
+Please read carefully (AdSense terms)[https://support.google.com/adsense/answer/48182?hl=en].
+You are using this module on your own risk.
 
 ## Install
 ```sh
@@ -14,7 +15,7 @@ npm install react-google-publisher-tag
 
  * Automatically show AD and fit the size
  * Automatically load google script
- * Support for mobile
+ * Support for mobile (you can show different size for mobile users)
  * Support for isomorphic applications
  * Support for responsible layout
 
@@ -85,10 +86,21 @@ Identifies the ad unit in the associated ad tag. Ad unit codes can be up to 100 
 ## Formats
 
 It will setup ad size automatically for this component:
-HORIZONTAL [[970, 90], [728, 90], [468, 60], [234, 60]]
-RECTANGLE [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]
-VERTICAL [[300, 600], [160, 600], [120, 600], [120, 240]]
+ - HORIZONTAL [[970, 90], [728, 90], [468, 60], [234, 60]]
+ - RECTANGLE [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]
+ - VERTICAL [[300, 600], [160, 600], [120, 600], [120, 240]]
 
+## Can be lower
+
+You can allow lower ad size automatically. (Default: true)
+
+## Mobile
+
+Change current ad to mobile (320x50) on the mobile devices. (Default: false)
+
+## Mobile width
+
+Define mobile check. Default (480px)
 
 ## Credits
 
