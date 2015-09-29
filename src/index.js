@@ -126,7 +126,8 @@ export default class GooglePublisherTag extends Component {
       initialized,
       windowWidth,
       currentDimensions,
-      availableDimensions
+      availableDimensions,
+      slot
     } = this.state;
 
     // need to wait for initialization
@@ -157,6 +158,10 @@ export default class GooglePublisherTag extends Component {
     // do nothink
     if (JSON.stringify(dimensions) === JSON.stringify(currentDimensions)) {
       return;
+    } else if (slot) {
+      // remove current slot because dimensions is changed and current slot is old
+      this.removeSlot();
+      return;
     }
 
     // first step generate new id and redraw component with new id
@@ -167,15 +172,15 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    // init slot - div is ready
-    const slot = googletag.defineSlot(path, dimensions, id);
-    slot.addService(googletag.pubads());
+    // init newSlot - div is ready
+    const newSlot = googletag.defineSlot(path, dimensions, id);
+    newSlot.addService(googletag.pubads());
 
     googletag.display(id);
-    googletag.pubads().refresh([slot]);
+    googletag.pubads().refresh([newSlot]);
 
     this.setState({
-      slot,
+      slot: newSlot,
       currentDimensions: dimensions
     });
   }
@@ -217,13 +222,10 @@ export default class GooglePublisherTag extends Component {
 
   render() {
     const id = this.state.id;
-    if (!id) {
-      return null;
-    }
 
     return (
       <div className={this.props.className}>
-        <div id={id} />
+        {id ? <div id={id} /> : null}
       </div>
     );
   }

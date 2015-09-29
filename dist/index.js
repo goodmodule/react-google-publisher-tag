@@ -171,6 +171,7 @@ var GooglePublisherTag = (function (_Component) {
       var windowWidth = _state.windowWidth;
       var currentDimensions = _state.currentDimensions;
       var availableDimensions = _state.availableDimensions;
+      var slot = _state.slot;
 
       // need to wait for initialization
       if (!initialized) {
@@ -200,6 +201,10 @@ var GooglePublisherTag = (function (_Component) {
       // do nothink
       if (JSON.stringify(dimensions) === JSON.stringify(currentDimensions)) {
         return;
+      } else if (slot) {
+        // remove current slot because dimensions is changed and current slot is old
+        this.removeSlot();
+        return;
       }
 
       // first step generate new id and redraw component with new id
@@ -210,15 +215,15 @@ var GooglePublisherTag = (function (_Component) {
         return;
       }
 
-      // init slot - div is ready
-      var slot = googletag.defineSlot(path, dimensions, id);
-      slot.addService(googletag.pubads());
+      // init newSlot - div is ready
+      var newSlot = googletag.defineSlot(path, dimensions, id);
+      newSlot.addService(googletag.pubads());
 
       googletag.display(id);
-      googletag.pubads().refresh([slot]);
+      googletag.pubads().refresh([newSlot]);
 
       this.setState({
-        slot: slot,
+        slot: newSlot,
         currentDimensions: dimensions
       });
     }
@@ -265,14 +270,11 @@ var GooglePublisherTag = (function (_Component) {
     key: 'render',
     value: function render() {
       var id = this.state.id;
-      if (!id) {
-        return null;
-      }
 
       return _react2['default'].createElement(
         'div',
         { className: this.props.className },
-        _react2['default'].createElement('div', { id: id })
+        id ? _react2['default'].createElement('div', { id: id }) : null
       );
     }
   }], [{
