@@ -10,7 +10,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 var _Dimensions;
 
@@ -33,11 +33,12 @@ var _keymirror2 = _interopRequireDefault(_keymirror);
 var Format = (0, _keymirror2['default'])({
   HORIZONTAL: null,
   RECTANGLE: null,
-  VERTICAL: null
+  VERTICAL: null,
+  MOBILE: null
 });
 
 exports.Format = Format;
-var Dimensions = (_Dimensions = {}, _defineProperty(_Dimensions, Format.HORIZONTAL, [[970, 90], [728, 90], [468, 60], [234, 60]]), _defineProperty(_Dimensions, Format.RECTANGLE, [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]), _defineProperty(_Dimensions, Format.VERTICAL, [[300, 600], [160, 600], [120, 600], [120, 240]]), _defineProperty(_Dimensions, 'MOBILE', [[320, 50]]), _defineProperty(_Dimensions, '300x600', [[300, 600], [160, 600]]), _defineProperty(_Dimensions, '336x280', [[336, 280], [300, 250]]), _defineProperty(_Dimensions, '728x90', [[728, 90], [468, 60]]), _defineProperty(_Dimensions, '970x90', [[970, 90], [728, 90], [468, 60]]), _Dimensions);
+var Dimensions = (_Dimensions = {}, _defineProperty(_Dimensions, Format.HORIZONTAL, [[970, 90], [728, 90], [468, 60], [234, 60]]), _defineProperty(_Dimensions, Format.RECTANGLE, [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]), _defineProperty(_Dimensions, Format.VERTICAL, [[300, 600], [160, 600], [120, 600], [120, 240]]), _defineProperty(_Dimensions, Format.MOBILE, [[320, 50]]), _defineProperty(_Dimensions, '300x600', [[300, 600], [160, 600]]), _defineProperty(_Dimensions, '336x280', [[336, 280], [300, 250]]), _defineProperty(_Dimensions, '728x90', [[728, 90], [468, 60]]), _defineProperty(_Dimensions, '970x90', [[970, 90], [728, 90], [468, 60]]), _Dimensions);
 
 exports.Dimensions = Dimensions;
 var nextID = 1;
@@ -86,26 +87,27 @@ var GooglePublisherTag = (function (_Component) {
   _createClass(GooglePublisherTag, null, [{
     key: 'propTypes',
     value: {
+      className: _react2['default'].PropTypes.string,
       path: _react2['default'].PropTypes.string.isRequired,
-      responsive: _react2['default'].PropTypes.bool.isRequired,
       format: _react2['default'].PropTypes.string.isRequired,
+      responsive: _react2['default'].PropTypes.bool.isRequired,
       canBeLower: _react2['default'].PropTypes.bool.isRequired, // can be ad lower than original size,
 
       dimensions: _react2['default'].PropTypes.array, // [[300, 600], [160, 600]]
 
-      media: _react2['default'].PropTypes.array,
-      mobile: _react2['default'].PropTypes.bool.isRequired,
-      mobileWidth: _react2['default'].PropTypes.number.isRequired
+      minWindowWidth: _react2['default'].PropTypes.number.isRequired,
+      maxWindowWidth: _react2['default'].PropTypes.number.isRequired
     },
     enumerable: true
   }, {
     key: 'defaultProps',
     value: {
-      responsive: true,
       format: Format.HORIZONTAL,
+      responsive: true,
       canBeLower: true,
-      mobile: false,
-      mobileWidth: 480
+      dimensions: null,
+      minWindowWidth: false,
+      maxWindowWidth: false
     },
     enumerable: true
   }]);
@@ -117,12 +119,12 @@ var GooglePublisherTag = (function (_Component) {
 
     this.handleResize = this.handleResize.bind(this);
 
+    var dimensions = props.dimensions;
+    var format = props.format;
+    var canBeLower = props.canBeLower;
+
     this.state = {
-      id: null,
-      slot: null,
-      initialized: false,
-      currentDimensionsJSON: null,
-      dimensions: this.prepareDimensions(props)
+      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
     };
   }
 
@@ -147,81 +149,83 @@ var GooglePublisherTag = (function (_Component) {
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(props) {
+      var dimensions = props.dimensions;
+      var format = props.format;
+      var canBeLower = props.canBeLower;
+
       this.setState({
-        dimensions: this.prepareDimensions(props)
+        availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
       });
     }
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
-      if (!this.state.initialized) {
-        return;
-      }
-
       var _props = this.props;
       var path = _props.path;
       var responsive = _props.responsive;
-      var mobile = _props.mobile;
-      var mobileWidth = _props.mobileWidth;
-
-      var width = _react2['default'].findDOMNode(this).offsetWidth;
+      var minWindowWidth = _props.minWindowWidth;
+      var maxWindowWidth = _props.maxWindowWidth;
       var _state = this.state;
       var id = _state.id;
+      var initialized = _state.initialized;
       var windowWidth = _state.windowWidth;
-      var currentDimensionsJSON = _state.currentDimensionsJSON;
-      var _state2 = this.state;
-      var dimensions = _state2.dimensions;
-      var slot = _state2.slot;
+      var currentDimensions = _state.currentDimensions;
+      var availableDimensions = _state.availableDimensions;
 
-      // init slot
-      if (id && !slot) {
-        slot = googletag.defineSlot(path, JSON.parse(currentDimensionsJSON), id);
-        slot.addService(googletag.pubads());
-
-        googletag.display(id);
-        googletag.pubads().refresh([slot]);
-
-        this.setState({ slot: slot });
+      // need to wait for initialization
+      if (!initialized) {
         return;
       }
 
       // reduce dimensions to current width
-      if (responsive) {
-        dimensions = dimensions.filter(function (dimension) {
-          return dimension[0] <= width;
-        });
+      var componentWidth = _react2['default'].findDOMNode(this).offsetWidth;
+      var dimensions = responsive ? availableDimensions.filter(function (dimension) {
+        return dimension[0] <= componentWidth;
+      }) : dimensions;
+
+      if (minWindowWidth !== false && minWindowWidth < windowWidth) {
+        dimensions = [];
       }
 
-      if (windowWidth <= mobileWidth) {
-        if (mobile) {
-          dimensions = Dimensions.MOBILE;
-        } else if (!mobile && slot) {
-          this.removeSlot();
-          return;
-        }
+      if (maxWindowWidth !== false && maxWindowWidth > windowWidth) {
+        dimensions = [];
       }
 
-      var dimensionsJSON = JSON.stringify(dimensions);
-      if (dimensionsJSON === currentDimensionsJSON) {
-        return;
-      }
-
-      if (slot) {
+      // destroy existing slot if exists
+      if (!dimensions || !dimensions.length) {
         this.removeSlot();
-      }
-
-      if (!dimensions.length) {
         return;
       }
+
+      // do nothink
+      if (JSON.stringify(dimensions) === JSON.stringify(currentDimensions)) {
+        return;
+      }
+
+      // first step generate new id and redraw component with new id
+      if (!id) {
+        this.setState({
+          id: getNextID()
+        });
+        return;
+      }
+
+      // init slot - div is ready
+      var slot = googletag.defineSlot(path, dimensions, id);
+      slot.addService(googletag.pubads());
+
+      googletag.display(id);
+      googletag.pubads().refresh([slot]);
 
       this.setState({
-        id: getNextID(),
-        currentDimensionsJSON: dimensionsJSON
+        slot: slot,
+        currentDimensions: dimensions
       });
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
+      // TODO sometimes can props changed
       if (this.props.responsive) {
         window.removeEventListener('resize', this.handleResize);
       }
@@ -229,56 +233,26 @@ var GooglePublisherTag = (function (_Component) {
       this.removeSlot();
     }
   }, {
-    key: 'getWindowWidth',
-    value: function getWindowWidth() {
-      return window.innerWidth;
-    }
-  }, {
-    key: 'prepareDimensions',
-    value: function prepareDimensions(props) {
-      var dimensions = props.dimensions;
-      var format = props.format;
-
-      if (!dimensions || !dimensions.length) {
-        return Dimensions[format];
-      }
-
-      if (dimensions.length === 1 && this.props.canBeLower) {
-        var dimension = dimensions[0];
-        var key = dimension[0] + 'x' + dimension[1];
-
-        if (Dimensions[key]) {
-          return Dimensions[key];
-        }
-      }
-
-      return dimensions;
-    }
-  }, {
     key: 'removeSlot',
     value: function removeSlot() {
-      if (!this.state.slot) {
-        return;
+      var slot = this.state.slot;
+      if (slot) {
+        googletag.pubads().clear([slot]);
       }
-
-      var slots = [this.state.slot];
-      googletag.pubads().clear(slots);
 
       this.setState({
         id: null,
         slot: null,
-        currentDimensionsJSON: null
+        currentDimensions: null
       });
     }
   }, {
     key: 'refreshSlot',
     value: function refreshSlot() {
-      if (!this.state.slot) {
-        return;
+      var slot = this.state.slot;
+      if (slot) {
+        googletag.pubads().refresh([slot]);
       }
-
-      var slots = [this.state.slot];
-      googletag.pubads().refresh(slots);
     }
   }, {
     key: 'handleResize',
@@ -291,13 +265,36 @@ var GooglePublisherTag = (function (_Component) {
     key: 'render',
     value: function render() {
       var id = this.state.id;
-      var content = id ? _react2['default'].createElement('div', { id: id }) : null;
+      if (!id) {
+        return null;
+      }
 
       return _react2['default'].createElement(
         'div',
-        null,
-        content
+        { className: this.props.className },
+        _react2['default'].createElement('div', { id: id })
       );
+    }
+  }], [{
+    key: 'prepareDimensions',
+    value: function prepareDimensions(dimensions) {
+      var format = arguments.length <= 1 || arguments[1] === undefined ? Format.HORIZONTAL : arguments[1];
+      var canBeLower = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+      if (!dimensions || !dimensions.length) {
+        return Dimensions[format];
+      }
+
+      if (dimensions.length === 1 && canBeLower) {
+        var dimension = dimensions[0];
+        var key = dimension[0] + 'x' + dimension[1];
+
+        if (Dimensions[key]) {
+          return Dimensions[key];
+        }
+      }
+
+      return dimensions;
     }
   }]);
 

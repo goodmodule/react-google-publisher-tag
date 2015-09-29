@@ -8,14 +8,15 @@ import keymirror from 'keymirror';
 export const Format = keymirror({
   HORIZONTAL: null,
   RECTANGLE: null,
-  VERTICAL: null
+  VERTICAL: null,
+  MOBILE: null
 });
 
 export const Dimensions = {
   [Format.HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [234, 60]],
   [Format.RECTANGLE]: [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]],
   [Format.VERTICAL]: [[300, 600], [160, 600], [120, 600], [120, 240]],
-  MOBILE: [[320, 50]],
+  [Format.MOBILE]: [[320, 50]],
   '300x600': [[300, 600], [160, 600]],
   '336x280': [[336, 280], [300, 250]],
   '728x90': [[728, 90], [468, 60]],
@@ -64,37 +65,36 @@ function initGooglePublisherTag() {
 
 export default class GooglePublisherTag extends Component {
   static propTypes = {
+    className: React.PropTypes.string,
     path: React.PropTypes.string.isRequired,
-    responsive: React.PropTypes.bool.isRequired,
     format: React.PropTypes.string.isRequired,
+    responsive: React.PropTypes.bool.isRequired,
     canBeLower: React.PropTypes.bool.isRequired, // can be ad lower than original size,
 
     dimensions: React.PropTypes.array,  // [[300, 600], [160, 600]]
 
-    media: React.PropTypes.array,
-    mobile: React.PropTypes.bool.isRequired,
-    mobileWidth: React.PropTypes.number.isRequired
-  }
+    minWindowWidth: React.PropTypes.number.isRequired,
+    maxWindowWidth: React.PropTypes.number.isRequired
+  };
 
   static defaultProps = {
-    responsive: true,
     format: Format.HORIZONTAL,
+    responsive: true,
     canBeLower: true,
-    mobile: false,
-    mobileWidth: 480
-  }
+    dimensions: null,
+    minWindowWidth: false,
+    maxWindowWidth: false
+  };
 
   constructor(props, context) {
     super(props, context);
 
     this.handleResize = this.handleResize.bind(this);
 
+    const { dimensions, format, canBeLower } = props;
+
     this.state = {
-      id: null,
-      slot: null,
-      initialized: false,
-      currentDimensionsJSON: null,
-      dimensions: this.prepareDimensions(props)
+      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
     };
   }
 
@@ -112,69 +112,76 @@ export default class GooglePublisherTag extends Component {
   }
 
   componentWillReceiveProps(props) {
+    const { dimensions, format, canBeLower } = props;
+
     this.setState({
-      dimensions: this.prepareDimensions(props)
+      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
     });
   }
 
   componentDidUpdate() {
-    if (!this.state.initialized) {
-      return;
-    }
+    const { path, responsive, minWindowWidth, maxWindowWidth } = this.props;
+    const {
+      id,
+      initialized,
+      windowWidth,
+      currentDimensions,
+      availableDimensions
+    } = this.state;
 
-    const { path, responsive, mobile, mobileWidth } = this.props;
-    const width = React.findDOMNode(this).offsetWidth;
-    const { id, windowWidth, currentDimensionsJSON } = this.state;
-    let { dimensions, slot } = this.state;
-
-    // init slot
-    if (id && !slot) {
-      slot = googletag.defineSlot(path, JSON.parse(currentDimensionsJSON), id);
-      slot.addService(googletag.pubads());
-
-      googletag.display(id);
-      googletag.pubads().refresh([slot]);
-
-      this.setState({ slot });
+    // need to wait for initialization
+    if (!initialized) {
       return;
     }
 
     // reduce dimensions to current width
-    if (responsive) {
-      dimensions = dimensions.filter(function(dimension) {
-        return dimension[0] <= width;
-      });
+    const componentWidth = React.findDOMNode(this).offsetWidth;
+    let dimensions = responsive
+      ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
+      : dimensions;
+
+    if (minWindowWidth !== false && minWindowWidth < windowWidth) {
+      dimensions = [];
     }
 
-    if (windowWidth <= mobileWidth) {
-      if (mobile) {
-        dimensions = Dimensions.MOBILE;
-      } else if (!mobile && slot) {
-        this.removeSlot();
-        return;
-      }
+    if (maxWindowWidth !== false && maxWindowWidth > windowWidth) {
+      dimensions = [];
     }
 
-    const dimensionsJSON = JSON.stringify(dimensions);
-    if (dimensionsJSON === currentDimensionsJSON) {
-      return;
-    }
-
-    if (slot) {
+    // destroy existing slot if exists
+    if (!dimensions || !dimensions.length) {
       this.removeSlot();
-    }
-
-    if (!dimensions.length) {
       return;
     }
+
+    // do nothink
+    if (JSON.stringify(dimensions) === JSON.stringify(currentDimensions)) {
+      return;
+    }
+
+    // first step generate new id and redraw component with new id
+    if (!id) {
+      this.setState({
+        id: getNextID()
+      });
+      return;
+    }
+
+    // init slot - div is ready
+    const slot = googletag.defineSlot(path, dimensions, id);
+    slot.addService(googletag.pubads());
+
+    googletag.display(id);
+    googletag.pubads().refresh([slot]);
 
     this.setState({
-      id: getNextID(),
-      currentDimensionsJSON: dimensionsJSON
+      slot,
+      currentDimensions: dimensions
     });
   }
 
   componentWillUnmount() {
+    // TODO sometimes can props changed
     if (this.props.responsive) {
       window.removeEventListener('resize', this.handleResize);
     }
@@ -182,51 +189,24 @@ export default class GooglePublisherTag extends Component {
     this.removeSlot();
   }
 
-  getWindowWidth() {
-    return window.innerWidth;
-  }
-
-  prepareDimensions(props) {
-    const { dimensions, format } = props;
-
-    if (!dimensions || !dimensions.length) {
-      return Dimensions[format];
-    }
-
-    if (dimensions.length === 1 && this.props.canBeLower) {
-      const dimension = dimensions[0];
-      const key = `${dimension[0]}x${dimension[1]}`;
-
-      if (Dimensions[key]) {
-        return Dimensions[key];
-      }
-    }
-
-    return dimensions;
-  }
-
   removeSlot() {
-    if (!this.state.slot) {
-      return;
+    const slot = this.state.slot;
+    if (slot) {
+      googletag.pubads().clear([slot]);
     }
-
-    const slots = [this.state.slot];
-    googletag.pubads().clear(slots);
 
     this.setState({
       id: null,
       slot: null,
-      currentDimensionsJSON: null
+      currentDimensions: null
     });
   }
 
   refreshSlot() {
-    if (!this.state.slot) {
-      return;
+    const slot = this.state.slot;
+    if (slot) {
+      googletag.pubads().refresh([slot]);
     }
-
-    const slots = [this.state.slot];
-    googletag.pubads().refresh(slots);
   }
 
   handleResize() {
@@ -237,10 +217,31 @@ export default class GooglePublisherTag extends Component {
 
   render() {
     const id = this.state.id;
-    const content = id ? <div id={id} /> : null;
+    if (!id) {
+      return null;
+    }
 
     return (
-      <div>{content}</div>
+      <div className={this.props.className}>
+        <div id={id} />
+      </div>
     );
+  }
+
+  static prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
+    if (!dimensions || !dimensions.length) {
+      return Dimensions[format];
+    }
+
+    if (dimensions.length === 1 && canBeLower) {
+      const dimension = dimensions[0];
+      const key = `${dimension[0]}x${dimension[1]}`;
+
+      if (Dimensions[key]) {
+        return Dimensions[key];
+      }
+    }
+
+    return dimensions;
   }
 }
