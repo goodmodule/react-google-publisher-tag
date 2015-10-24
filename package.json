@@ -1,6 +1,6 @@
 {
   "name": "react-google-publisher-tag",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Adsense via Google publisher tag for the isomorphic applications",
   "author": {
     "name": "Zlatko Fedor",
@@ -37,7 +37,7 @@
   },
   "dependencies": {},
   "peerDependencies": {
-    "react": ">=0.13.x"
+    "react": "0.13.x||0.14.x"
   },
   "devDependencies": {
     "gulp": "~3.9.0",
