@@ -3,6 +3,7 @@
 */
 
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import keymirror from 'keymirror';
 
 export const Format = keymirror({
@@ -136,7 +137,12 @@ export default class GooglePublisherTag extends Component {
     }
 
     // reduce dimensions to current width
-    const componentWidth = React.findDOMNode(this).offsetWidth;
+    const node = findDOMNode(this);
+    if (!node) {
+      return;
+    }
+
+    const componentWidth = node.offsetWidth;
     let dimensions = responsive
       ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
       : dimensions;
