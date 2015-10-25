@@ -83,8 +83,8 @@ export default class GooglePublisherTag extends Component {
     responsive: true,
     canBeLower: true,
     dimensions: null,
-    minWindowWidth: false,
-    maxWindowWidth: false
+    minWindowWidth: -1,
+    maxWindowWidth: -1
   };
 
   constructor(props, context) {
@@ -147,11 +147,11 @@ export default class GooglePublisherTag extends Component {
       ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
       : dimensions;
 
-    if (minWindowWidth !== false && minWindowWidth < windowWidth) {
+    if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
       dimensions = [];
     }
 
-    if (maxWindowWidth !== false && maxWindowWidth > windowWidth) {
+    if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
       dimensions = [];
     }
 

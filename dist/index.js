@@ -108,8 +108,8 @@ var GooglePublisherTag = (function (_Component) {
       responsive: true,
       canBeLower: true,
       dimensions: null,
-      minWindowWidth: false,
-      maxWindowWidth: false
+      minWindowWidth: -1,
+      maxWindowWidth: -1
     },
     enumerable: true
   }]);
@@ -191,11 +191,11 @@ var GooglePublisherTag = (function (_Component) {
         return dimension[0] <= componentWidth;
       }) : dimensions;
 
-      if (minWindowWidth !== false && minWindowWidth < windowWidth) {
+      if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
         dimensions = [];
       }
 
-      if (maxWindowWidth !== false && maxWindowWidth > windowWidth) {
+      if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
         dimensions = [];
       }
 
