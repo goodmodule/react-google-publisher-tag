@@ -10,7 +10,7 @@ export const Format = keymirror({
   HORIZONTAL: null,
   RECTANGLE: null,
   VERTICAL: null,
-  MOBILE: null
+  MOBILE: null,
 });
 
 export const Dimensions = {
@@ -21,7 +21,7 @@ export const Dimensions = {
   '300x600': [[300, 600], [160, 600]],
   '336x280': [[336, 280], [300, 250]],
   '728x90': [[728, 90], [468, 60]],
-  '970x90': [[970, 90], [728, 90], [468, 60]]
+  '970x90': [[970, 90], [728, 90], [468, 60]],
 };
 
 let nextID = 1;
@@ -39,7 +39,7 @@ function initGooglePublisherTag() {
   googletag = window.googletag = window.googletag || {};
   googletag.cmd = googletag.cmd || [];
 
-  googletag.cmd.push(function() {
+  googletag.cmd.push(function prepareGoogleTag() {
     // add support for async loading
     googletag.pubads().enableAsyncRendering();
 
@@ -53,7 +53,7 @@ function initGooglePublisherTag() {
     googletag.enableServices();
   });
 
-  (function() {
+  (function loadScript() {
     const gads = document.createElement('script');
     gads.async = true;
     gads.type = 'text/javascript';
@@ -75,7 +75,7 @@ export default class GooglePublisherTag extends Component {
     dimensions: React.PropTypes.array,  // [[300, 600], [160, 600]]
 
     minWindowWidth: React.PropTypes.number.isRequired,
-    maxWindowWidth: React.PropTypes.number.isRequired
+    maxWindowWidth: React.PropTypes.number.isRequired,
   };
 
   static defaultProps = {
@@ -84,18 +84,16 @@ export default class GooglePublisherTag extends Component {
     canBeLower: true,
     dimensions: null,
     minWindowWidth: -1,
-    maxWindowWidth: -1
+    maxWindowWidth: -1,
   };
 
   constructor(props, context) {
     super(props, context);
 
-    this.handleResize = this.handleResize.bind(this);
-
     const { dimensions, format, canBeLower } = props;
 
     this.state = {
-      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
+      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower),
     };
   }
 
@@ -108,7 +106,7 @@ export default class GooglePublisherTag extends Component {
 
     googletag.cmd.push(() => this.setState({
       initialized: true,
-      windowWidth: window.innerWidth
+      windowWidth: window.innerWidth,
     }));
   }
 
@@ -116,7 +114,7 @@ export default class GooglePublisherTag extends Component {
     const { dimensions, format, canBeLower } = props;
 
     this.setState({
-      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower)
+      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower),
     });
   }
 
@@ -128,7 +126,7 @@ export default class GooglePublisherTag extends Component {
       windowWidth,
       currentDimensions,
       availableDimensions,
-      slot
+      slot,
     } = this.state;
 
     // need to wait for initialization
@@ -173,7 +171,7 @@ export default class GooglePublisherTag extends Component {
     // first step generate new id and redraw component with new id
     if (!id) {
       this.setState({
-        id: getNextID()
+        id: getNextID(),
       });
       return;
     }
@@ -187,7 +185,7 @@ export default class GooglePublisherTag extends Component {
 
     this.setState({
       slot: newSlot,
-      currentDimensions: dimensions
+      currentDimensions: dimensions,
     });
   }
 
@@ -209,7 +207,7 @@ export default class GooglePublisherTag extends Component {
     this.setState({
       id: null,
       slot: null,
-      currentDimensions: null
+      currentDimensions: null,
     });
   }
 
@@ -220,20 +218,10 @@ export default class GooglePublisherTag extends Component {
     }
   }
 
-  handleResize() {
+  handleResize = () => {
     this.setState({
-      windowWidth: window.innerWidth
+      windowWidth: window.innerWidth,
     });
-  }
-
-  render() {
-    const id = this.state.id;
-
-    return (
-      <div className={this.props.className}>
-        {id ? <div id={id} /> : null}
-      </div>
-    );
   }
 
   static prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
@@ -251,5 +239,15 @@ export default class GooglePublisherTag extends Component {
     }
 
     return dimensions;
+  }
+
+  render() {
+    const id = this.state.id;
+
+    return (
+      <div className={this.props.className}>
+        {id ? <div id={id} /> : null}
+      </div>
+    );
   }
 }

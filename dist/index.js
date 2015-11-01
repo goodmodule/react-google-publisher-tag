@@ -58,7 +58,7 @@ function initGooglePublisherTag() {
   googletag = window.googletag = window.googletag || {};
   googletag.cmd = googletag.cmd || [];
 
-  googletag.cmd.push(function () {
+  googletag.cmd.push(function prepareGoogleTag() {
     // add support for async loading
     googletag.pubads().enableAsyncRendering();
 
@@ -72,7 +72,7 @@ function initGooglePublisherTag() {
     googletag.enableServices();
   });
 
-  (function () {
+  (function loadScript() {
     var gads = document.createElement('script');
     gads.async = true;
     gads.type = 'text/javascript';
@@ -115,11 +115,17 @@ var GooglePublisherTag = (function (_Component) {
   }]);
 
   function GooglePublisherTag(props, context) {
+    var _this = this;
+
     _classCallCheck(this, GooglePublisherTag);
 
     _get(Object.getPrototypeOf(GooglePublisherTag.prototype), 'constructor', this).call(this, props, context);
 
-    this.handleResize = this.handleResize.bind(this);
+    this.handleResize = function () {
+      _this.setState({
+        windowWidth: window.innerWidth
+      });
+    };
 
     var dimensions = props.dimensions;
     var format = props.format;
@@ -133,7 +139,7 @@ var GooglePublisherTag = (function (_Component) {
   _createClass(GooglePublisherTag, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this = this;
+      var _this2 = this;
 
       initGooglePublisherTag();
 
@@ -142,7 +148,7 @@ var GooglePublisherTag = (function (_Component) {
       }
 
       googletag.cmd.push(function () {
-        return _this.setState({
+        return _this2.setState({
           initialized: true,
           windowWidth: window.innerWidth
         });
@@ -265,13 +271,6 @@ var GooglePublisherTag = (function (_Component) {
       if (slot) {
         googletag.pubads().refresh([slot]);
       }
-    }
-  }, {
-    key: 'handleResize',
-    value: function handleResize() {
-      this.setState({
-        windowWidth: window.innerWidth
-      });
     }
   }, {
     key: 'render',
