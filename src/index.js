@@ -3,13 +3,14 @@
 */
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
+import keymirror from 'keymirror';
 
-export const Format = {
-  HORIZONTAL: 'HORIZONTAL',
-  RECTANGLE: 'RECTANGLE',
-  VERTICAL: 'VERTICAL',
-  MOBILE: 'MOBILE',
-};
+export const Format = keymirror({
+  HORIZONTAL: null,
+  RECTANGLE: null,
+  VERTICAL: null,
+  MOBILE: null,
+});
 
 export const Dimensions = {
   [Format.HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [234, 60]],

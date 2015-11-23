@@ -27,12 +27,16 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = require('react-dom');
 
-var Format = {
-  HORIZONTAL: 'HORIZONTAL',
-  RECTANGLE: 'RECTANGLE',
-  VERTICAL: 'VERTICAL',
-  MOBILE: 'MOBILE'
-};
+var _keymirror = require('keymirror');
+
+var _keymirror2 = _interopRequireDefault(_keymirror);
+
+var Format = (0, _keymirror2['default'])({
+  HORIZONTAL: null,
+  RECTANGLE: null,
+  VERTICAL: null,
+  MOBILE: null
+});
 
 exports.Format = Format;
 var Dimensions = (_Dimensions = {}, _defineProperty(_Dimensions, Format.HORIZONTAL, [[970, 90], [728, 90], [468, 60], [234, 60]]), _defineProperty(_Dimensions, Format.RECTANGLE, [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]), _defineProperty(_Dimensions, Format.VERTICAL, [[300, 600], [160, 600], [120, 600], [120, 240]]), _defineProperty(_Dimensions, Format.MOBILE, [[320, 50]]), _defineProperty(_Dimensions, '300x600', [[300, 600], [160, 600]]), _defineProperty(_Dimensions, '336x280', [[336, 280], [300, 250]]), _defineProperty(_Dimensions, '728x90', [[728, 90], [468, 60]]), _defineProperty(_Dimensions, '970x90', [[970, 90], [728, 90], [468, 60]]), _Dimensions);
