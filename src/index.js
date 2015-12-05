@@ -23,6 +23,23 @@ export const Dimensions = {
   '970x90': [[970, 90], [728, 90], [468, 60]],
 };
 
+function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
+  if (!dimensions || !dimensions.length) {
+    return Dimensions[format] || [];
+  }
+
+  if (dimensions.length === 1 && canBeLower) {
+    const dimension = dimensions[0];
+    const key = `${dimension[0]}x${dimension[1]}`;
+
+    if (Dimensions[key]) {
+      return Dimensions[key] || [];
+    }
+  }
+
+  return dimensions;
+}
+
 let nextID = 1;
 let googletag = null;
 
@@ -86,16 +103,6 @@ export default class GooglePublisherTag extends Component {
     maxWindowWidth: -1,
   };
 
-  constructor(props, context) {
-    super(props, context);
-
-    const { dimensions, format, canBeLower } = props;
-
-    this.state = {
-      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower),
-    };
-  }
-
   componentDidMount() {
     initGooglePublisherTag();
 
@@ -103,89 +110,15 @@ export default class GooglePublisherTag extends Component {
       window.addEventListener('resize', this.handleResize);
     }
 
-    googletag.cmd.push(() => this.setState({
-      initialized: true,
-      windowWidth: window.innerWidth,
-    }));
+    googletag.cmd.push(() => {
+      this.initialized = true;
+
+      this.update(this.props);
+    });
   }
 
   componentWillReceiveProps(props) {
-    const { dimensions, format, canBeLower } = props;
-
-    this.setState({
-      availableDimensions: GooglePublisherTag.prepareDimensions(dimensions, format, canBeLower),
-    });
-  }
-
-  componentDidUpdate() {
-    const { path, responsive, minWindowWidth, maxWindowWidth } = this.props;
-    const {
-      id,
-      initialized,
-      windowWidth,
-      currentDimensions,
-      availableDimensions,
-      slot,
-    } = this.state;
-
-    // need to wait for initialization
-    if (!initialized) {
-      return;
-    }
-
-    // reduce dimensions to current width
-    const node = findDOMNode(this);
-    if (!node) {
-      return;
-    }
-
-    const componentWidth = node.offsetWidth;
-    let dimensions = responsive
-      ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
-      : dimensions;
-
-    if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
-      dimensions = [];
-    }
-
-    if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
-      dimensions = [];
-    }
-
-    // destroy existing slot if exists
-    if (!dimensions || !dimensions.length) {
-      this.removeSlot();
-      return;
-    }
-
-    // do nothink
-    if (JSON.stringify(dimensions) === JSON.stringify(currentDimensions)) {
-      return;
-    } else if (slot) {
-      // remove current slot because dimensions is changed and current slot is old
-      this.removeSlot();
-      return;
-    }
-
-    // first step generate new id and redraw component with new id
-    if (!id) {
-      this.setState({
-        id: getNextID(),
-      });
-      return;
-    }
-
-    // init newSlot - div is ready
-    const newSlot = googletag.defineSlot(path, dimensions, id);
-    newSlot.addService(googletag.pubads());
-
-    googletag.display(id);
-    googletag.pubads().refresh([newSlot]);
-
-    this.setState({
-      slot: newSlot,
-      currentDimensions: dimensions,
-    });
+    this.update(props);
   }
 
   componentWillUnmount() {
@@ -197,56 +130,97 @@ export default class GooglePublisherTag extends Component {
     this.removeSlot();
   }
 
-  removeSlot() {
-    const slot = this.state.slot;
-    if (slot) {
-      googletag.pubads().clear([slot]);
+  update(props) {
+    if (!this.initialized) {
+      return;
     }
 
-    this.setState({
-      id: null,
-      slot: null,
-      currentDimensions: null,
-    });
+    const node = findDOMNode(this);
+    if (!node) {
+      return;
+    }
+
+    const componentWidth = node.offsetWidth;
+    const availableDimensions = prepareDimensions(props.dimensions, props.format, props.canBeLower);
+
+    // filter by available node space
+    let dimensions = props.responsive
+      ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
+      : availableDimensions;
+
+
+    // filter by min and max width
+    const windowWidth = window.innerWidth;
+    const { minWindowWidth, maxWindowWidth } = props;
+
+    if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
+      dimensions = [];
+    } else if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
+      dimensions = [];
+    }
+
+    // do nothink
+    if (JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
+      return;
+    }
+
+    this.currentDimensions = dimensions;
+
+
+    if (this.slot) {
+      // remove current slot because dimensions is changed and current slot is old
+      this.removeSlot();
+    }
+
+    // there is nothink to display
+    if (!dimensions || !dimensions.length) {
+      return;
+    }
+
+    if (!this.refs.holder) {
+      console.log('RGPT holder is undefined');
+      return;
+    }
+
+    // prepare new node
+    const id = getNextID();
+    this.refs.holder.innerHTML = `<div id="${id}"></div>`;
+
+    // prepare new slot
+    const slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
+    slot.addService(googletag.pubads());
+
+    // display new slot
+    googletag.display(id);
+    googletag.pubads().refresh([slot]);
+  }
+
+  removeSlot() {
+    if (!this.slot) {
+      return;
+    }
+
+    googletag.pubads().clear([this.slot]);
+    this.slot = null;
+
+    if (this.refs.holder) {
+      this.refs.holder.innerHTML = null;
+    }
   }
 
   refreshSlot() {
-    const slot = this.state.slot;
-    if (slot) {
-      googletag.pubads().refresh([slot]);
+    if (this.slot) {
+      googletag.pubads().refresh([this.slot]);
     }
   }
 
   handleResize = () => {
-    this.setState({
-      windowWidth: window.innerWidth,
-    });
-  }
-
-  static prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
-    if (!dimensions || !dimensions.length) {
-      return Dimensions[format];
-    }
-
-    if (dimensions.length === 1 && canBeLower) {
-      const dimension = dimensions[0];
-      const key = `${dimension[0]}x${dimension[1]}`;
-
-      if (Dimensions[key]) {
-        return Dimensions[key];
-      }
-    }
-
-    return dimensions;
+    this.update(this.props);
   }
 
   render() {
-    const id = this.state.id;
-
     return (
-      <div className={this.props.className}>
-        {id ? <div id={id} /> : null}
-      </div>
+      <div className={this.props.className} ref="holder"></div>
     );
   }
 }
