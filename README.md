@@ -50,16 +50,16 @@ var App = module.exports = React.createClass({
 
 ## Parameters
 
-| Name       |     Type  |  Required | Default    |
-|------------|-----------|-----------|------------|
-| path       | String    | true      |            |
-| responsive | Boolean   | true      | true       |
-| format     | String    | true      | HORIZONTAL |
-| canBeLower | Boolean   | true      | true       |
-| mobile     | Boolean   | true      | false      |
-| mobileWidth| Integer   | true      | 480        |
-| media      | Boolean   | false     |            |
-| dimensions | Array     | false     |            |
+| Name           |     Type  |  Required | Default    |
+|----------------|-----------|-----------|------------|
+| path           | String    | true      |            |
+| responsive     | Boolean   | true      | true       |
+| format         | String    | true      | HORIZONTAL |
+| canBeLower     | Boolean   | true      | true       |
+| dimensions     | Array     | false     |            |
+| minWindowWidth | Integer   | false     | -1         |
+| maxWindowWidth | Integer   | false     | -1         |
+| className      | String    | false     |            |
 
 ## Path
 
@@ -89,18 +89,15 @@ It will setup ad size automatically for this component:
  - HORIZONTAL [[970, 90], [728, 90], [468, 60], [234, 60]]
  - RECTANGLE [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]
  - VERTICAL [[300, 600], [160, 600], [120, 600], [120, 240]]
+ - MOBILE: [[320, 50]],
+ - 300x600: [[300, 600], [160, 600]]
+ - 336x280: [[336, 280], [300, 250]]
+ - 728x90: [[728, 90], [468, 60]]
+ - 970x90: [[970, 90], [728, 90], [468, 60]]
 
 ## Can be lower
 
 You can allow lower ad size automatically. (Default: true)
-
-## Mobile
-
-Change current ad to mobile (320x50) on the mobile devices. (Default: false)
-
-## Mobile width
-
-Define mobile check. Default (480px)
 
 ## Credits
 
