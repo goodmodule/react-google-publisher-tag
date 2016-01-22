@@ -216,11 +216,11 @@ export default class GooglePublisherTag extends Component {
 
   handleResize = () => {
     this.update(this.props);
-  }
+  };
 
   render() {
     return (
-      <div className={this.props.className} ref="holder"></div>
+      <div className={this.props.className} ref="holder" />
     );
   }
 }
