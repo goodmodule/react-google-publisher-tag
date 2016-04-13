@@ -1,13 +1,13 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Dimensions;
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Dimensions = exports.Format = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Dimensions;
 
 var _react = require('react');
 
@@ -30,6 +30,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /**
                                                                                                                                                                                                                    * https://developers.google.com/doubleclick-gpt/reference
                                                                                                                                                                                                                   */
+
 
 var Format = exports.Format = (0, _keymirror2.default)({
   HORIZONTAL: null,
@@ -175,6 +176,9 @@ var GooglePublisherTag = function (_Component) {
       var windowWidth = window.innerWidth;
       var minWindowWidth = props.minWindowWidth;
       var maxWindowWidth = props.maxWindowWidth;
+      var _props$targeting = props.targeting;
+      var targeting = _props$targeting === undefined ? [] : _props$targeting;
+
 
       if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
         dimensions = [];
@@ -210,6 +214,14 @@ var GooglePublisherTag = function (_Component) {
 
       // prepare new slot
       var slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
+
+      // set targets
+      for (var key in targeting) {
+        if (targeting.hasOwnProperty(key)) {
+          slot.setTargeting(key, targeting[key]);
+        }
+      }
+
       slot.addService(googletag.pubads());
 
       // display new slot

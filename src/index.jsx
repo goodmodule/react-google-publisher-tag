@@ -151,7 +151,7 @@ export default class GooglePublisherTag extends Component {
 
     // filter by min and max width
     const windowWidth = window.innerWidth;
-    const { minWindowWidth, maxWindowWidth } = props;
+    const { minWindowWidth, maxWindowWidth, targeting = [] } = props;
 
     if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
       dimensions = [];
@@ -188,6 +188,14 @@ export default class GooglePublisherTag extends Component {
 
     // prepare new slot
     const slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
+
+    // set targets
+    for (let key in targeting) {
+      if (targeting.hasOwnProperty(key)) {
+        slot.setTargeting(key, targeting[key]);
+      }
+    }
+
     slot.addService(googletag.pubads());
 
     // display new slot

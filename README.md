@@ -60,6 +60,7 @@ var App = module.exports = React.createClass({
 | minWindowWidth | Integer   | false     | -1         |
 | maxWindowWidth | Integer   | false     | -1         |
 | className      | String    | false     |            |
+| targeting      | Object    | false     |            |
 
 ## Path
 
@@ -98,6 +99,19 @@ It will setup ad size automatically for this component:
 ## Can be lower
 
 You can allow lower ad size automatically. (Default: true)
+
+## Targeting
+
+Add custom targeting parameters for a slot. 
+The object's attributes are the keys while their value is the value.
+
+Example:
+```
+ { 
+   color: 'red',
+   sport: ['rugby', 'rowing']
+ } 
+ ```
 
 ## Credits
 
