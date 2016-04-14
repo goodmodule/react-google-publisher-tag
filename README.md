@@ -27,16 +27,31 @@ npm install react-google-publisher-tag
  - Use ad code as path in the react component
 
 
-### App.jsx
-
-Application part (load google analytics script to your webpage on the client side).
-ReactGAnalytics has parameter ID (use your own ID)
+### Example.jsx
 
 ```js
-var React = require('react');
-var AD = require('react-google-publisher-tag');
+//ES6
+import React, { Component } from 'react';
+import AD from 'react-google-publisher-tag';
 
-var App = module.exports = React.createClass({
+export default class Example extends Component {
+  render() {
+    return (
+      <div id="application">
+        <AD path="/network-code/ad-code" />
+        <RouteHandler />
+      </div>
+    );
+  }
+}
+```
+
+```js
+//ES5
+var React = require('react');
+var AD = require('react-google-publisher-tag').default;
+
+module.exports = React.createClass({
   render: function() {
     return (
       <div id="application">
@@ -102,16 +117,16 @@ You can allow lower ad size automatically. (Default: true)
 
 ## Targeting
 
-Add custom targeting parameters for a slot. 
+Add custom targeting parameters for a slot.
 The object's attributes are the keys while their value is the value.
 
 Example:
+```js
+{
+  color: 'red',
+  sport: ['rugby', 'rowing'],
+}
 ```
- { 
-   color: 'red',
-   sport: ['rugby', 'rowing']
- } 
- ```
 
 ## Credits
 

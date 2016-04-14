@@ -1,9 +1,10 @@
 /**
  * https://developers.google.com/doubleclick-gpt/reference
 */
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import keymirror from 'keymirror';
+import forOwn from 'lodash/forOwn';
 
 export const Format = keymirror({
   HORIZONTAL: null,
@@ -44,7 +45,17 @@ let nextID = 1;
 let googletag = null;
 
 function getNextID() {
-  return 'rgpt-' + (nextID++);
+  return `rgpt-${nextID++}`;
+}
+
+function loadScript() {
+  const gads = document.createElement('script');
+  gads.async = true;
+  gads.type = 'text/javascript';
+  gads.src = '//www.googletagservices.com/tag/js/gpt.js';
+
+  const head = document.getElementsByTagName('head')[0];
+  head.appendChild(gads);
 }
 
 function initGooglePublisherTag() {
@@ -55,7 +66,7 @@ function initGooglePublisherTag() {
   googletag = window.googletag = window.googletag || {};
   googletag.cmd = googletag.cmd || [];
 
-  googletag.cmd.push(function prepareGoogleTag() {
+  googletag.cmd.push(() => {
     // add support for async loading
     googletag.pubads().enableAsyncRendering();
 
@@ -69,29 +80,22 @@ function initGooglePublisherTag() {
     googletag.enableServices();
   });
 
-  (function loadScript() {
-    const gads = document.createElement('script');
-    gads.async = true;
-    gads.type = 'text/javascript';
-    gads.src = '//www.googletagservices.com/tag/js/gpt.js';
-
-    const head = document.getElementsByTagName('head')[0];
-    head.appendChild(gads);
-  })();
+  loadScript();
 }
 
 export default class GooglePublisherTag extends Component {
   static propTypes = {
-    className: React.PropTypes.string,
-    path: React.PropTypes.string.isRequired,
-    format: React.PropTypes.string.isRequired,
-    responsive: React.PropTypes.bool.isRequired,
-    canBeLower: React.PropTypes.bool.isRequired, // can be ad lower than original size,
+    className: PropTypes.string,
+    path: PropTypes.string.isRequired,
+    format: PropTypes.string.isRequired,
+    responsive: PropTypes.bool.isRequired,
+    canBeLower: PropTypes.bool.isRequired, // can be ad lower than original size,
 
-    dimensions: React.PropTypes.array,  // [[300, 600], [160, 600]]
+    dimensions: PropTypes.array,  // [[300, 600], [160, 600]]
 
-    minWindowWidth: React.PropTypes.number.isRequired,
-    maxWindowWidth: React.PropTypes.number.isRequired,
+    minWindowWidth: PropTypes.number.isRequired,
+    maxWindowWidth: PropTypes.number.isRequired,
+    targeting: PropTypes.object,
   };
 
   static defaultProps = {
@@ -151,7 +155,7 @@ export default class GooglePublisherTag extends Component {
 
     // filter by min and max width
     const windowWidth = window.innerWidth;
-    const { minWindowWidth, maxWindowWidth, targeting = [] } = props;
+    const { minWindowWidth, maxWindowWidth, targeting } = props;
 
     if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
       dimensions = [];
@@ -189,11 +193,11 @@ export default class GooglePublisherTag extends Component {
     // prepare new slot
     const slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
 
-    // set targets
-    for (let key in targeting) {
-      if (targeting.hasOwnProperty(key)) {
-        slot.setTargeting(key, targeting[key]);
-      }
+    // set targeting
+    if (targeting) {
+      forOwn(targeting, (value, key) => {
+        slot.setTargeting(key, value);
+      });
     }
 
     slot.addService(googletag.pubads());
