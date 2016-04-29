@@ -65,19 +65,20 @@ module.exports = React.createClass({
 
 ## Parameters
 
-| Name           |     Type  |  Required | Default   |
-|----------------------------|-----------|-----------|------------|
-| path                       | String    | true      |            |
-| responsive                 | Boolean   | true      | true       |
-| format                     | String    | true      | HORIZONTAL |
-| canBeLower                 | Boolean   | true      | true       |
-| dimensions                 | Array     | false     |            |
-| minWindowWidth             | Integer   | false     | -1         |
-| maxWindowWidth             | Integer   | false     | -1         |
-| className                  | String    | false     |            |
-| targeting                  | Object    | false     |            |
-| slotRenderedCallback       | Function  | false     |            |
-| impressionViewableCallback | Function  | false     |            |
+| Name                       |     Type         |  Required | Default   |
+|----------------------------|------------------|-----------|------------|
+| path                       | String           | true      |            |
+| responsive                 | Boolean          | true      | true       |
+| format                     | String           | true      | HORIZONTAL |
+| canBeLower                 | Boolean          | true      | true       |
+| dimensions                 | Array            | false     |            |
+| minWindowWidth             | Integer          | false     | -1         |
+| maxWindowWidth             | Integer          | false     | -1         |
+| className                  | String           | false     |            |
+| targeting                  | Object           | false     |            |
+| slotRenderedCallback       | Function         | false     |            |
+| impressionViewableCallback | Function         | false     |            |
+| collapseEmptyDiv           | boolean or Array | false     |            |
 
 ## Path
 
@@ -137,6 +138,15 @@ Pass a function that will be executed when the slot is rendered.
 ## impressionViewableCallback
 
 Pass a function that will be executed when the ad is fully rendered.
+
+## CollapseEmptyDiv
+
+Define the collapsing behaviour of empty slots for a specific slots (default it set to true).
+| Behaviour                         | Argument     |
+|-----------------------------------|--------------|
+| Don't collapse the slot at all    | false        |
+| Collapse the slot before fetching | [true, true] |
+| Collapse the slot after fetching  | true         |
 
 ## Credits
 
