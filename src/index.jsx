@@ -58,13 +58,41 @@ function loadScript() {
   head.appendChild(gads);
 }
 
-function initGooglePublisherTag() {
-  if (googletag) {
-    return;
+function initGooglePublisherTag(props) {
+  const exitAfterAddingCommands = !!googletag;
+
+  if (!googletag) {
+    googletag = window.googletag = window.googletag || {};
+    googletag.cmd = googletag.cmd || [];
   }
 
-  googletag = window.googletag = window.googletag || {};
-  googletag.cmd = googletag.cmd || [];
+  const { onImpressionViewable, onSlotRenderEnded, path } = props;
+
+  // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
+  if (typeof onSlotRenderEnded === 'function') {
+    googletag.cmd.push(function addCallback() {
+      googletag.pubads().addEventListener('slotRenderEnded', function slotRenderEnded(event) {
+        // check if the current slot is the one the callback was added to (as addEventListener is global)
+        if (event.slot.getAdUnitPath() === path) {
+          onSlotRenderEnded(event);
+        }
+      });
+    });
+  }
+  // Execute callback when ad is completely visible in DOM
+  if (typeof onImpressionViewable === 'function') {
+    googletag.cmd.push(function addCallback() {
+      googletag.pubads().addEventListener('impressionViewable', function imporessionViewable(event) {
+        if (event.slot.getAdUnitPath() === path) {
+          onImpressionViewable(event);
+        }
+      });
+    });
+  }
+
+  if (exitAfterAddingCommands) {
+    return;
+  }
 
   googletag.cmd.push(() => {
     // add support for async loading
@@ -108,7 +136,7 @@ export default class GooglePublisherTag extends Component {
   };
 
   componentDidMount() {
-    initGooglePublisherTag();
+    initGooglePublisherTag(this.props);
 
     if (this.props.responsive) {
       window.addEventListener('resize', this.handleResize);

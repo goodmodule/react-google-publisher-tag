@@ -65,17 +65,19 @@ module.exports = React.createClass({
 
 ## Parameters
 
-| Name           |     Type  |  Required | Default    |
-|----------------|-----------|-----------|------------|
-| path           | String    | true      |            |
-| responsive     | Boolean   | true      | true       |
-| format         | String    | true      | HORIZONTAL |
-| canBeLower     | Boolean   | true      | true       |
-| dimensions     | Array     | false     |            |
-| minWindowWidth | Integer   | false     | -1         |
-| maxWindowWidth | Integer   | false     | -1         |
-| className      | String    | false     |            |
-| targeting      | Object    | false     |            |
+| Name           |     Type  |  Required | Default   |
+|----------------------------|-----------|-----------|------------|
+| path                       | String    | true      |            |
+| responsive                 | Boolean   | true      | true       |
+| format                     | String    | true      | HORIZONTAL |
+| canBeLower                 | Boolean   | true      | true       |
+| dimensions                 | Array     | false     |            |
+| minWindowWidth             | Integer   | false     | -1         |
+| maxWindowWidth             | Integer   | false     | -1         |
+| className                  | String    | false     |            |
+| targeting                  | Object    | false     |            |
+| slotRenderedCallback       | Function  | false     |            |
+| impressionViewableCallback | Function  | false     |            |
 
 ## Path
 
@@ -127,6 +129,14 @@ Example:
   sport: ['rugby', 'rowing'],
 }
 ```
+
+## SlotRenderedCallback
+
+Pass a function that will be executed when the slot is rendered.
+
+## impressionViewableCallback
+
+Pass a function that will be executed when the ad is fully rendered.
 
 ## Credits
 
