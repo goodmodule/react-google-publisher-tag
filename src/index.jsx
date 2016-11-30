@@ -4,7 +4,6 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import keymirror from 'keymirror';
-import forOwn from 'lodash/forOwn';
 
 export const Format = keymirror({
   HORIZONTAL: null,
@@ -223,8 +222,8 @@ export default class GooglePublisherTag extends Component {
 
     // set targeting
     if (targeting) {
-      forOwn(targeting, (value, key) => {
-        slot.setTargeting(key, value);
+      Object.keys(targeting).forEach((key) => {
+        slot.setTargeting(key, targeting[key]);
       });
     }
 

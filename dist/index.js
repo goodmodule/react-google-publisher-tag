@@ -68,6 +68,16 @@ function getNextID() {
   return 'rgpt-' + nextID++;
 }
 
+function loadScript() {
+  var gads = document.createElement('script');
+  gads.async = true;
+  gads.type = 'text/javascript';
+  gads.src = '//www.googletagservices.com/tag/js/gpt.js';
+
+  var head = document.getElementsByTagName('head')[0];
+  head.appendChild(gads);
+}
+
 function initGooglePublisherTag(props) {
   var exitAfterAddingCommands = !!googletag;
 
@@ -107,7 +117,7 @@ function initGooglePublisherTag(props) {
     return;
   }
 
-  googletag.cmd.push(function prepareGoogleTag() {
+  googletag.cmd.push(function () {
     // add support for async loading
     googletag.pubads().enableAsyncRendering();
 
@@ -121,22 +131,14 @@ function initGooglePublisherTag(props) {
     googletag.enableServices();
   });
 
-  (function loadScript() {
-    var gads = document.createElement('script');
-    gads.async = true;
-    gads.type = 'text/javascript';
-    gads.src = '//www.googletagservices.com/tag/js/gpt.js';
-
-    var head = document.getElementsByTagName('head')[0];
-    head.appendChild(gads);
-  })();
+  loadScript();
 }
 
 var GooglePublisherTag = function (_Component) {
   _inherits(GooglePublisherTag, _Component);
 
   function GooglePublisherTag() {
-    var _Object$getPrototypeO;
+    var _ref;
 
     var _temp, _this, _ret;
 
@@ -146,7 +148,7 @@ var GooglePublisherTag = function (_Component) {
       args[_key] = arguments[_key];
     }
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(GooglePublisherTag)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.handleResize = function () {
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = GooglePublisherTag.__proto__ || Object.getPrototypeOf(GooglePublisherTag)).call.apply(_ref, [this].concat(args))), _this), _this.handleResize = function () {
       _this.update(_this.props);
     }, _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -207,8 +209,7 @@ var GooglePublisherTag = function (_Component) {
       var windowWidth = window.innerWidth;
       var minWindowWidth = props.minWindowWidth;
       var maxWindowWidth = props.maxWindowWidth;
-      var _props$targeting = props.targeting;
-      var targeting = _props$targeting === undefined ? [] : _props$targeting;
+      var targeting = props.targeting;
 
 
       if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
@@ -246,11 +247,11 @@ var GooglePublisherTag = function (_Component) {
       // prepare new slot
       var slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
 
-      // set targets
-      for (var key in targeting) {
-        if (targeting.hasOwnProperty(key)) {
+      // set targeting
+      if (targeting) {
+        Object.keys(targeting).forEach(function (key) {
           slot.setTargeting(key, targeting[key]);
-        }
+        });
       }
 
       slot.addService(googletag.pubads());
@@ -291,16 +292,17 @@ var GooglePublisherTag = function (_Component) {
 }(_react.Component);
 
 GooglePublisherTag.propTypes = {
-  className: _react2.default.PropTypes.string,
-  path: _react2.default.PropTypes.string.isRequired,
-  format: _react2.default.PropTypes.string.isRequired,
-  responsive: _react2.default.PropTypes.bool.isRequired,
-  canBeLower: _react2.default.PropTypes.bool.isRequired, // can be ad lower than original size,
+  className: _react.PropTypes.string,
+  path: _react.PropTypes.string.isRequired,
+  format: _react.PropTypes.string.isRequired,
+  responsive: _react.PropTypes.bool.isRequired,
+  canBeLower: _react.PropTypes.bool.isRequired, // can be ad lower than original size,
 
-  dimensions: _react2.default.PropTypes.array, // [[300, 600], [160, 600]]
+  dimensions: _react.PropTypes.array, // [[300, 600], [160, 600]]
 
-  minWindowWidth: _react2.default.PropTypes.number.isRequired,
-  maxWindowWidth: _react2.default.PropTypes.number.isRequired
+  minWindowWidth: _react.PropTypes.number.isRequired,
+  maxWindowWidth: _react.PropTypes.number.isRequired,
+  targeting: _react.PropTypes.object
 };
 GooglePublisherTag.defaultProps = {
   format: Format.HORIZONTAL,
