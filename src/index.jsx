@@ -182,7 +182,7 @@ export default class GooglePublisherTag extends Component {
 
     // filter by min and max width
     const windowWidth = window.innerWidth;
-    const { minWindowWidth, maxWindowWidth, targeting } = props;
+    const { minWindowWidth, maxWindowWidth, targeting, collapseEmptyDiv } = props;
 
     if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
       dimensions = [];
@@ -225,6 +225,14 @@ export default class GooglePublisherTag extends Component {
       Object.keys(targeting).forEach((key) => {
         slot.setTargeting(key, targeting[key]);
       });
+    }
+
+    if (typeof collapseEmptyDiv !== 'undefined') {
+      if (Array.isArray(collapseEmptyDiv)) {
+        slot.setCollapseEmptyDiv.apply('setCollapseEmptyDiv', collapseEmptyDiv);
+      } else {
+        slot.setCollapseEmptyDiv(collapseEmptyDiv);
+      }
     }
 
     slot.addService(googletag.pubads());
