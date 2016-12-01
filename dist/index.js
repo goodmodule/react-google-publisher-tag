@@ -42,8 +42,8 @@ var Format = exports.Format = (0, _keymirror2.default)({
 var Dimensions = exports.Dimensions = (_Dimensions = {}, _defineProperty(_Dimensions, Format.HORIZONTAL, [[970, 90], [728, 90], [468, 60], [234, 60]]), _defineProperty(_Dimensions, Format.RECTANGLE, [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]), _defineProperty(_Dimensions, Format.VERTICAL, [[300, 600], [160, 600], [120, 600], [120, 240]]), _defineProperty(_Dimensions, Format.MOBILE, [[320, 50]]), _defineProperty(_Dimensions, '300x600', [[300, 600], [160, 600]]), _defineProperty(_Dimensions, '336x280', [[336, 280], [300, 250]]), _defineProperty(_Dimensions, '728x90', [[728, 90], [468, 60]]), _defineProperty(_Dimensions, '970x90', [[970, 90], [728, 90], [468, 60]]), _Dimensions);
 
 function prepareDimensions(dimensions) {
-  var format = arguments.length <= 1 || arguments[1] === undefined ? Format.HORIZONTAL : arguments[1];
-  var canBeLower = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Format.HORIZONTAL;
+  var canBeLower = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
   if (!dimensions || !dimensions.length) {
     return Dimensions[format] || [];
@@ -86,9 +86,9 @@ function initGooglePublisherTag(props) {
     googletag.cmd = googletag.cmd || [];
   }
 
-  var onImpressionViewable = props.onImpressionViewable;
-  var onSlotRenderEnded = props.onSlotRenderEnded;
-  var path = props.path;
+  var onImpressionViewable = props.onImpressionViewable,
+      onSlotRenderEnded = props.onSlotRenderEnded,
+      path = props.path;
 
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
 
@@ -207,9 +207,9 @@ var GooglePublisherTag = function (_Component) {
 
       // filter by min and max width
       var windowWidth = window.innerWidth;
-      var minWindowWidth = props.minWindowWidth;
-      var maxWindowWidth = props.maxWindowWidth;
-      var targeting = props.targeting;
+      var minWindowWidth = props.minWindowWidth,
+          maxWindowWidth = props.maxWindowWidth,
+          targeting = props.targeting;
 
 
       if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
