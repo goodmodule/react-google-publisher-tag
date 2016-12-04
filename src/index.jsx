@@ -2,26 +2,9 @@
  * https://developers.google.com/doubleclick-gpt/reference
 */
 import React, { Component, PropTypes } from 'react';
-import { findDOMNode } from 'react-dom';
-import keymirror from 'keymirror';
-
-export const Format = keymirror({
-  HORIZONTAL: null,
-  RECTANGLE: null,
-  VERTICAL: null,
-  MOBILE: null,
-});
-
-export const Dimensions = {
-  [Format.HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [234, 60]],
-  [Format.RECTANGLE]: [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]],
-  [Format.VERTICAL]: [[300, 600], [160, 600], [120, 600], [120, 240]],
-  [Format.MOBILE]: [[320, 50]],
-  '300x600': [[300, 600], [160, 600]],
-  '336x280': [[336, 280], [300, 250]],
-  '728x90': [[728, 90], [468, 60]],
-  '970x90': [[970, 90], [728, 90], [468, 60]],
-};
+import debounce from 'lodash.debounce';
+import Format from './constants/Format';
+import Dimensions from './constants/Dimensions';
 
 function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
   if (!dimensions || !dimensions.length) {
@@ -40,11 +23,13 @@ function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = 
   return dimensions;
 }
 
-let nextID = 1;
+let nextId = 1;
 let googletag = null;
 
-function getNextID() {
-  return `rgpt-${nextID++}`;
+function getNextId() {
+  nextId += 1;
+
+  return `rgpt-${nextId}`;
 }
 
 function loadScript() {
@@ -69,19 +54,21 @@ function initGooglePublisherTag(props) {
 
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
   if (typeof onSlotRenderEnded === 'function') {
-    googletag.cmd.push(function addCallback() {
-      googletag.pubads().addEventListener('slotRenderEnded', function slotRenderEnded(event) {
-        // check if the current slot is the one the callback was added to (as addEventListener is global)
+    googletag.cmd.push(() => {
+      googletag.pubads().addEventListener('slotRenderEnded', (event) => {
+        // check if the current slot is the one the callback was added to
+        // (as addEventListener is global)
         if (event.slot.getAdUnitPath() === path) {
           onSlotRenderEnded(event);
         }
       });
     });
   }
+
   // Execute callback when ad is completely visible in DOM
   if (typeof onImpressionViewable === 'function') {
-    googletag.cmd.push(function addCallback() {
-      googletag.pubads().addEventListener('impressionViewable', function imporessionViewable(event) {
+    googletag.cmd.push(() => {
+      googletag.pubads().addEventListener('impressionViewable', (event) => {
         if (event.slot.getAdUnitPath() === path) {
           onImpressionViewable(event);
         }
@@ -117,12 +104,11 @@ export default class GooglePublisherTag extends Component {
     format: PropTypes.string.isRequired,
     responsive: PropTypes.bool.isRequired,
     canBeLower: PropTypes.bool.isRequired, // can be ad lower than original size,
-
     dimensions: PropTypes.array,  // [[300, 600], [160, 600]]
-
-    minWindowWidth: PropTypes.number.isRequired,
-    maxWindowWidth: PropTypes.number.isRequired,
+    minWindowWidth: PropTypes.number,
+    maxWindowWidth: PropTypes.number,
     targeting: PropTypes.object,
+    resizeDebounce: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
@@ -130,20 +116,18 @@ export default class GooglePublisherTag extends Component {
     responsive: true,
     canBeLower: true,
     dimensions: null,
-    minWindowWidth: -1,
-    maxWindowWidth: -1,
+    resizeDebounce: 100,
   };
 
   componentDidMount() {
     initGooglePublisherTag(this.props);
 
     if (this.props.responsive) {
-      window.addEventListener('resize', this.handleResize);
+      window.addEventListener('resize', this.onResize);
     }
 
     googletag.cmd.push(() => {
       this.initialized = true;
-
       this.update(this.props);
     });
   }
@@ -155,7 +139,7 @@ export default class GooglePublisherTag extends Component {
   componentWillUnmount() {
     // TODO sometimes can props changed
     if (this.props.responsive) {
-      window.removeEventListener('resize', this.handleResize);
+      window.removeEventListener('resize', this.onResize);
     }
 
     this.removeSlot();
@@ -166,7 +150,7 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    const node = findDOMNode(this);
+    const { node } = this;
     if (!node) {
       return;
     }
@@ -176,17 +160,16 @@ export default class GooglePublisherTag extends Component {
 
     // filter by available node space
     let dimensions = props.responsive
-      ? availableDimensions.filter((dimension) => dimension[0] <= componentWidth)
+      ? availableDimensions.filter(dimension => dimension[0] <= componentWidth)
       : availableDimensions;
-
 
     // filter by min and max width
     const windowWidth = window.innerWidth;
     const { minWindowWidth, maxWindowWidth, targeting } = props;
 
-    if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
+    if (minWindowWidth !== undefined && minWindowWidth < windowWidth) {
       dimensions = [];
-    } else if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
+    } else if (maxWindowWidth !== undefined && maxWindowWidth > windowWidth) {
       dimensions = [];
     }
 
@@ -208,14 +191,9 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    if (!this.refs.holder) {
-      console.log('RGPT holder is undefined');
-      return;
-    }
-
-    // prepare new node
-    const id = getNextID();
-    this.refs.holder.innerHTML = `<div id="${id}"></div>`;
+    // prepare new node content
+    const id = getNextId();
+    node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
     const slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
@@ -242,8 +220,8 @@ export default class GooglePublisherTag extends Component {
     googletag.pubads().clear([this.slot]);
     this.slot = null;
 
-    if (this.refs.holder) {
-      this.refs.holder.innerHTML = null;
+    if (this.node) {
+      this.node.innerHTML = null;
     }
   }
 
@@ -253,13 +231,22 @@ export default class GooglePublisherTag extends Component {
     }
   }
 
-  handleResize = () => {
-    this.update(this.props);
-  };
+  onResize = () => {
+    const { resizeDebounce } = this.props;
+
+    if (!this.resizeDebounce) {
+      this.resizeDebounce = debounce(
+        () => this.update(this.props),
+        resizeDebounce,
+      );
+    }
+
+    this.resizeDebounce();
+  }
 
   render() {
     return (
-      <div className={this.props.className} ref="holder" />
+      <div className={this.props.className} ref={(node) => { this.node = node; }} />
     );
   }
 }

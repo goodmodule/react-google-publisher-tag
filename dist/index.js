@@ -3,21 +3,24 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Dimensions = exports.Format = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Dimensions;
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = require('react-dom');
+var _lodash = require('lodash.debounce');
 
-var _keymirror = require('keymirror');
+var _lodash2 = _interopRequireDefault(_lodash);
 
-var _keymirror2 = _interopRequireDefault(_keymirror);
+var _Format = require('./constants/Format');
+
+var _Format2 = _interopRequireDefault(_Format);
+
+var _Dimensions = require('./constants/Dimensions');
+
+var _Dimensions2 = _interopRequireDefault(_Dimensions);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -25,47 +28,38 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * https://developers.google.com/doubleclick-gpt/reference
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /**
-                                                                                                                                                                                                                   * https://developers.google.com/doubleclick-gpt/reference
-                                                                                                                                                                                                                  */
-
-
-var Format = exports.Format = (0, _keymirror2.default)({
-  HORIZONTAL: null,
-  RECTANGLE: null,
-  VERTICAL: null,
-  MOBILE: null
-});
-
-var Dimensions = exports.Dimensions = (_Dimensions = {}, _defineProperty(_Dimensions, Format.HORIZONTAL, [[970, 90], [728, 90], [468, 60], [234, 60]]), _defineProperty(_Dimensions, Format.RECTANGLE, [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]), _defineProperty(_Dimensions, Format.VERTICAL, [[300, 600], [160, 600], [120, 600], [120, 240]]), _defineProperty(_Dimensions, Format.MOBILE, [[320, 50]]), _defineProperty(_Dimensions, '300x600', [[300, 600], [160, 600]]), _defineProperty(_Dimensions, '336x280', [[336, 280], [300, 250]]), _defineProperty(_Dimensions, '728x90', [[728, 90], [468, 60]]), _defineProperty(_Dimensions, '970x90', [[970, 90], [728, 90], [468, 60]]), _Dimensions);
 
 function prepareDimensions(dimensions) {
-  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Format.HORIZONTAL;
+  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _Format2.default.HORIZONTAL;
   var canBeLower = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
   if (!dimensions || !dimensions.length) {
-    return Dimensions[format] || [];
+    return _Dimensions2.default[format] || [];
   }
 
   if (dimensions.length === 1 && canBeLower) {
     var dimension = dimensions[0];
     var key = dimension[0] + 'x' + dimension[1];
 
-    if (Dimensions[key]) {
-      return Dimensions[key] || [];
+    if (_Dimensions2.default[key]) {
+      return _Dimensions2.default[key] || [];
     }
   }
 
   return dimensions;
 }
 
-var nextID = 1;
+var nextId = 1;
 var googletag = null;
 
-function getNextID() {
-  return 'rgpt-' + nextID++;
+function getNextId() {
+  nextId += 1;
+
+  return 'rgpt-' + nextId;
 }
 
 function loadScript() {
@@ -93,19 +87,21 @@ function initGooglePublisherTag(props) {
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
 
   if (typeof onSlotRenderEnded === 'function') {
-    googletag.cmd.push(function addCallback() {
-      googletag.pubads().addEventListener('slotRenderEnded', function slotRenderEnded(event) {
-        // check if the current slot is the one the callback was added to (as addEventListener is global)
+    googletag.cmd.push(function () {
+      googletag.pubads().addEventListener('slotRenderEnded', function (event) {
+        // check if the current slot is the one the callback was added to
+        // (as addEventListener is global)
         if (event.slot.getAdUnitPath() === path) {
           onSlotRenderEnded(event);
         }
       });
     });
   }
+
   // Execute callback when ad is completely visible in DOM
   if (typeof onImpressionViewable === 'function') {
-    googletag.cmd.push(function addCallback() {
-      googletag.pubads().addEventListener('impressionViewable', function imporessionViewable(event) {
+    googletag.cmd.push(function () {
+      googletag.pubads().addEventListener('impressionViewable', function (event) {
         if (event.slot.getAdUnitPath() === path) {
           onImpressionViewable(event);
         }
@@ -148,8 +144,17 @@ var GooglePublisherTag = function (_Component) {
       args[_key] = arguments[_key];
     }
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = GooglePublisherTag.__proto__ || Object.getPrototypeOf(GooglePublisherTag)).call.apply(_ref, [this].concat(args))), _this), _this.handleResize = function () {
-      _this.update(_this.props);
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = GooglePublisherTag.__proto__ || Object.getPrototypeOf(GooglePublisherTag)).call.apply(_ref, [this].concat(args))), _this), _this.onResize = function () {
+      var resizeDebounce = _this.props.resizeDebounce;
+
+
+      if (!_this.resizeDebounce) {
+        _this.resizeDebounce = (0, _lodash2.default)(function () {
+          return _this.update(_this.props);
+        }, resizeDebounce);
+      }
+
+      _this.resizeDebounce();
     }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -161,12 +166,11 @@ var GooglePublisherTag = function (_Component) {
       initGooglePublisherTag(this.props);
 
       if (this.props.responsive) {
-        window.addEventListener('resize', this.handleResize);
+        window.addEventListener('resize', this.onResize);
       }
 
       googletag.cmd.push(function () {
         _this2.initialized = true;
-
         _this2.update(_this2.props);
       });
     }
@@ -180,7 +184,7 @@ var GooglePublisherTag = function (_Component) {
     value: function componentWillUnmount() {
       // TODO sometimes can props changed
       if (this.props.responsive) {
-        window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('resize', this.onResize);
       }
 
       this.removeSlot();
@@ -192,7 +196,8 @@ var GooglePublisherTag = function (_Component) {
         return;
       }
 
-      var node = (0, _reactDom.findDOMNode)(this);
+      var node = this.node;
+
       if (!node) {
         return;
       }
@@ -212,9 +217,9 @@ var GooglePublisherTag = function (_Component) {
           targeting = props.targeting;
 
 
-      if (minWindowWidth !== -1 && minWindowWidth < windowWidth) {
+      if (minWindowWidth !== undefined && minWindowWidth < windowWidth) {
         dimensions = [];
-      } else if (maxWindowWidth !== -1 && maxWindowWidth > windowWidth) {
+      } else if (maxWindowWidth !== undefined && maxWindowWidth > windowWidth) {
         dimensions = [];
       }
 
@@ -235,14 +240,9 @@ var GooglePublisherTag = function (_Component) {
         return;
       }
 
-      if (!this.refs.holder) {
-        console.log('RGPT holder is undefined');
-        return;
-      }
-
-      // prepare new node
-      var id = getNextID();
-      this.refs.holder.innerHTML = '<div id="' + id + '"></div>';
+      // prepare new node content
+      var id = getNextId();
+      node.innerHTML = '<div id="' + id + '"></div>';
 
       // prepare new slot
       var slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
@@ -270,8 +270,8 @@ var GooglePublisherTag = function (_Component) {
       googletag.pubads().clear([this.slot]);
       this.slot = null;
 
-      if (this.refs.holder) {
-        this.refs.holder.innerHTML = null;
+      if (this.node) {
+        this.node.innerHTML = null;
       }
     }
   }, {
@@ -284,7 +284,11 @@ var GooglePublisherTag = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      return _react2.default.createElement('div', { className: this.props.className, ref: 'holder' });
+      var _this3 = this;
+
+      return _react2.default.createElement('div', { className: this.props.className, ref: function ref(node) {
+          _this3.node = node;
+        } });
     }
   }]);
 
@@ -297,19 +301,17 @@ GooglePublisherTag.propTypes = {
   format: _react.PropTypes.string.isRequired,
   responsive: _react.PropTypes.bool.isRequired,
   canBeLower: _react.PropTypes.bool.isRequired, // can be ad lower than original size,
-
   dimensions: _react.PropTypes.array, // [[300, 600], [160, 600]]
-
-  minWindowWidth: _react.PropTypes.number.isRequired,
-  maxWindowWidth: _react.PropTypes.number.isRequired,
-  targeting: _react.PropTypes.object
+  minWindowWidth: _react.PropTypes.number,
+  maxWindowWidth: _react.PropTypes.number,
+  targeting: _react.PropTypes.object,
+  resizeDebounce: _react.PropTypes.bool.isRequired
 };
 GooglePublisherTag.defaultProps = {
-  format: Format.HORIZONTAL,
+  format: _Format2.default.HORIZONTAL,
   responsive: true,
   canBeLower: true,
   dimensions: null,
-  minWindowWidth: -1,
-  maxWindowWidth: -1
+  resizeDebounce: 100
 };
 exports.default = GooglePublisherTag;
