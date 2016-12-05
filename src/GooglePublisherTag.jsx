@@ -108,7 +108,7 @@ export default class GooglePublisherTag extends Component {
     minWindowWidth: PropTypes.number,
     maxWindowWidth: PropTypes.number,
     targeting: PropTypes.object,
-    resizeDebounce: PropTypes.bool.isRequired,
+    resizeDebounce: PropTypes.number.isRequired,
   };
 
   static defaultProps = {
