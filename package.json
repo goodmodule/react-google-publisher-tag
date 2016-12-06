@@ -1,6 +1,6 @@
 {
   "name": "react-google-publisher-tag",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Adsense via Google publisher tag for the isomorphic applications",
   "author": {
     "name": "Zlatko Fedor",
@@ -34,8 +34,7 @@
     "eslint": "node ./node_modules/eslint/bin/eslint.js --ext .js,.jsx ."
   },
   "dependencies": {
-    "keymirror": "^0.1.1",
-    "lodash.debounce": "^4.0.8"
+    "keymirror": "^0.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

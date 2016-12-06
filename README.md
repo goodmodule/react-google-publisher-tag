@@ -4,7 +4,7 @@
 
 I needed to show adsense via google publisher tag in my react isomorphic application.
 Please read carefully (AdSense terms)[https://support.google.com/adsense/answer/48182?hl=en].
-You are using this module on your own risk.
+You are using this module on your own risk. I am using it for 2 years without any problem.
 
 ## Install
 ```sh
@@ -65,19 +65,20 @@ module.exports = React.createClass({
 
 ## Parameters
 
-| Name           |     Type  |  Required | Default   |
-|----------------------------|-----------|-----------|------------|
-| path                       | String    | true      |            |
-| responsive                 | Boolean   | true      | true       |
-| format                     | String    | true      | HORIZONTAL |
-| canBeLower                 | Boolean   | true      | true       |
-| dimensions                 | Array     | false     |            |
-| minWindowWidth             | Integer   | false     | -1         |
-| maxWindowWidth             | Integer   | false     | -1         |
-| className                  | String    | false     |            |
-| targeting                  | Object    | false     |            |
-| slotRenderedCallback       | Function  | false     |            |
-| impressionViewableCallback | Function  | false     |            |
+| Name                       |     Type         |  Required | Default   |
+|----------------------------|------------------|-----------|------------|
+| path                       | String           | true      |            |
+| responsive                 | Boolean          | true      | true       |
+| format                     | String           | true      | HORIZONTAL |
+| canBeLower                 | Boolean          | true      | true       |
+| dimensions                 | Array            | false     |            |
+| minWindowWidth             | Integer          | false     |            |
+| maxWindowWidth             | Integer          | false     |            |
+| className                  | String           | false     |            |
+| targeting                  | Object           | false     |            |
+| onSlotRenderEnded          | Function         | false     |            |
+| onImpressionViewable       | Function         | false     |            |
+| collapseEmptyDiv           | boolean or Array | false     |            |
 
 ## Path
 
@@ -108,10 +109,13 @@ It will setup ad size automatically for this component:
  - RECTANGLE [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]
  - VERTICAL [[300, 600], [160, 600], [120, 600], [120, 240]]
  - MOBILE: [[320, 50]],
+ - MOBILE_BIG: [[320, 100], [320, 50]],
  - 300x600: [[300, 600], [160, 600]]
  - 336x280: [[336, 280], [300, 250]]
  - 728x90: [[728, 90], [468, 60]]
  - 970x90: [[970, 90], [728, 90], [468, 60]]
+
+Instead of format you can set your own dimmensions. More details you can find in the [adsense documentation](https://support.google.com/adsense/answer/6002621?hl=sk)
 
 ## Can be lower
 
@@ -130,11 +134,11 @@ Example:
 }
 ```
 
-## SlotRenderedCallback
+## onSlotRenderEnded
 
 Pass a function that will be executed when the slot is rendered.
 
-## impressionViewableCallback
+## onImpressionViewable
 
 Pass a function that will be executed when the ad is fully rendered.
 
@@ -146,4 +150,4 @@ Pass a function that will be executed when the ad is fully rendered.
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Zlatko Fedor zlatkofedor@cherrysro.com
+Copyright (c) 2016 Zlatko Fedor zlatkofedor@cherryprojects.com

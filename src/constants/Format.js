@@ -5,4 +5,5 @@ export default keymirror({
   RECTANGLE: null,
   VERTICAL: null,
   MOBILE: null,
+  MOBILE_BIG: null,
 });

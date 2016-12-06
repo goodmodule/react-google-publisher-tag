@@ -53,7 +53,7 @@ function initGooglePublisherTag(props) {
   const { onImpressionViewable, onSlotRenderEnded, path } = props;
 
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
-  if (typeof onSlotRenderEnded === 'function') {
+  if (onSlotRenderEnded) {
     googletag.cmd.push(() => {
       googletag.pubads().addEventListener('slotRenderEnded', (event) => {
         // check if the current slot is the one the callback was added to
@@ -66,7 +66,7 @@ function initGooglePublisherTag(props) {
   }
 
   // Execute callback when ad is completely visible in DOM
-  if (typeof onImpressionViewable === 'function') {
+  if (onImpressionViewable) {
     googletag.cmd.push(() => {
       googletag.pubads().addEventListener('impressionViewable', (event) => {
         if (event.slot.getAdUnitPath() === path) {
@@ -109,6 +109,7 @@ export default class GooglePublisherTag extends Component {
     maxWindowWidth: PropTypes.number,
     targeting: PropTypes.object,
     resizeDebounce: PropTypes.number.isRequired,
+    onSlotRenderEnded: PropTypes.func,
   };
 
   static defaultProps = {
@@ -165,7 +166,7 @@ export default class GooglePublisherTag extends Component {
 
     // filter by min and max width
     const windowWidth = window.innerWidth;
-    const { minWindowWidth, maxWindowWidth, targeting } = props;
+    const { minWindowWidth, maxWindowWidth, targeting, collapseEmptyDiv } = props;
 
     if (minWindowWidth !== undefined && minWindowWidth < windowWidth) {
       dimensions = [];
@@ -203,6 +204,15 @@ export default class GooglePublisherTag extends Component {
       Object.keys(targeting).forEach((key) => {
         slot.setTargeting(key, targeting[key]);
       });
+    }
+
+    // set collapsing
+    if (typeof collapseEmptyDiv !== 'undefined') {
+      const args = Array.isArray(collapseEmptyDiv)
+        ? collapseEmptyDiv
+        : [collapseEmptyDiv];
+
+      slot.setCollapseEmptyDiv(...args);
     }
 
     slot.addService(googletag.pubads());
