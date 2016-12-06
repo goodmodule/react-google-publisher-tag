@@ -2,9 +2,16 @@
  * https://developers.google.com/doubleclick-gpt/reference
 */
 import React, { Component, PropTypes } from 'react';
-import debounce from 'lodash.debounce';
 import Format from './constants/Format';
 import Dimensions from './constants/Dimensions';
+
+function debounce(fn, delay) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
 
 function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
   if (!dimensions || !dimensions.length) {
