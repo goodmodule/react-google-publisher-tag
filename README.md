@@ -71,6 +71,7 @@ module.exports = React.createClass({
 | responsive                 | Boolean          | true      | true       |
 | format                     | String           | true      | HORIZONTAL |
 | canBeLower                 | Boolean          | true      | true       |
+| enableSingleRequest        | Boolean          | true      | false      |
 | dimensions                 | Array            | false     |            |
 | minWindowWidth             | Integer          | false     |            |
 | maxWindowWidth             | Integer          | false     |            |
