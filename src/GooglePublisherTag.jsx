@@ -88,6 +88,11 @@ function initGooglePublisherTag(props) {
   }
 
   googletag.cmd.push(() => {
+    if (props.enableSingleRequest) {
+      // Infinite scroll requires SRA
+      googletag.pubads().enableSingleRequest();
+    }
+
     // add support for async loading
     googletag.pubads().enableAsyncRendering();
 
@@ -111,6 +116,7 @@ export default class GooglePublisherTag extends Component {
     format: PropTypes.string.isRequired,
     responsive: PropTypes.bool.isRequired,
     canBeLower: PropTypes.bool.isRequired, // can be ad lower than original size,
+    enableSingleRequest: PropTypes.bool.isRequired,
     dimensions: PropTypes.array,  // [[300, 600], [160, 600]]
     minWindowWidth: PropTypes.number,
     maxWindowWidth: PropTypes.number,
@@ -123,6 +129,7 @@ export default class GooglePublisherTag extends Component {
     format: Format.HORIZONTAL,
     responsive: true,
     canBeLower: true,
+    enableSingleRequest: false,
     dimensions: null,
     resizeDebounce: 100,
   };
