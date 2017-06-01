@@ -1,7 +1,8 @@
 /**
  * https://developers.google.com/doubleclick-gpt/reference
 */
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Format from './constants/Format';
 import Dimensions from './constants/Dimensions';
 
