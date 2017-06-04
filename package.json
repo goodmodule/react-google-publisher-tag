@@ -1,6 +1,6 @@
 {
   "name": "react-google-publisher-tag",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Adsense via Google publisher tag for the isomorphic applications",
   "author": {
     "name": "Zlatko Fedor",
@@ -24,6 +24,7 @@
   "private": false,
   "license": "MIT",
   "main": "./dist/index.js",
+  "esnext": "./src/index.js",
   "engines": {
     "node": ">= 0.10.0"
   },
