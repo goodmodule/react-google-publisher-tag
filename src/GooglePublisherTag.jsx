@@ -183,9 +183,9 @@ export default class GooglePublisherTag extends Component {
     const windowWidth = window.innerWidth;
     const { minWindowWidth, maxWindowWidth, targeting, collapseEmptyDiv } = props;
 
-    if (minWindowWidth !== undefined && minWindowWidth < windowWidth) {
+    if (minWindowWidth !== undefined && windowWidth < minWindowWidth) {
       dimensions = [];
-    } else if (maxWindowWidth !== undefined && maxWindowWidth > windowWidth) {
+    } else if (maxWindowWidth !== undefined && windowWidth > maxWindowWidth) {
       dimensions = [];
     }
 
