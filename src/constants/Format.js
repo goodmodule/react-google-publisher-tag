@@ -6,4 +6,7 @@ export default keymirror({
   VERTICAL: null,
   MOBILE: null,
   MOBILE_BIG: null,
+  MOBILE_HORIZONTAL: null,
+  PORTRET: null,
+  BILBORD: null,
 });

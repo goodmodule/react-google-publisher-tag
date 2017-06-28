@@ -139,7 +139,7 @@ export default class GooglePublisherTag extends Component {
     initGooglePublisherTag(this.props);
 
     if (this.props.responsive) {
-      window.addEventListener('resize', this.onResize);
+      window.addEventListener('resize', this.handleResize);
     }
 
     googletag.cmd.push(() => {
@@ -155,7 +155,7 @@ export default class GooglePublisherTag extends Component {
   componentWillUnmount() {
     // TODO sometimes can props changed
     if (this.props.responsive) {
-      window.removeEventListener('resize', this.onResize);
+      window.removeEventListener('resize', this.handleResize);
     }
 
     this.removeSlot();
@@ -212,7 +212,8 @@ export default class GooglePublisherTag extends Component {
     node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
-    const slot = this.slot = googletag.defineSlot(props.path, dimensions, id);
+    const slot = googletag.defineSlot(props.path, dimensions, id);
+    this.slot = slot;
 
     // set targeting
     if (targeting) {
@@ -256,7 +257,7 @@ export default class GooglePublisherTag extends Component {
     }
   }
 
-  onResize = () => {
+  handleResize = () => {
     const { resizeDebounce } = this.props;
 
     if (!this.resizeDebounce) {
@@ -269,9 +270,13 @@ export default class GooglePublisherTag extends Component {
     this.resizeDebounce();
   }
 
+  handleNode = (node) => {
+    this.node = node;
+  }
+
   render() {
     return (
-      <div className={this.props.className} ref={(node) => { this.node = node; }} />
+      <div className={this.props.className} ref={this.handleNode} />
     );
   }
 }
