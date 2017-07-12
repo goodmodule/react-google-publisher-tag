@@ -208,7 +208,7 @@ export default class GooglePublisherTag extends Component {
     }
 
     // prepare new node content
-    const id = getNextId();
+    const id = props.id || getNextId();
     node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
