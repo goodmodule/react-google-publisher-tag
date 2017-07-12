@@ -171,8 +171,6 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    const preset_id = props.id || false
-
     const componentWidth = node.offsetWidth;
     const availableDimensions = prepareDimensions(props.dimensions, props.format, props.canBeLower);
 
@@ -210,7 +208,7 @@ export default class GooglePublisherTag extends Component {
     }
 
     // prepare new node content
-    const id = (preset_id) ? preset_id : getNextId();
+    const id = props.id || getNextId();
     node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
