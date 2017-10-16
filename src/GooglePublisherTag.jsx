@@ -196,6 +196,7 @@ export default class GooglePublisherTag extends Component {
 
     this.currentDimensions = dimensions;
 
+
     if (this.slot) {
       // remove current slot because dimensions is changed and current slot is old
       this.removeSlot();
