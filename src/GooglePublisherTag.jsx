@@ -190,12 +190,11 @@ export default class GooglePublisherTag extends Component {
     }
 
     // do nothink
-    if (JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
+    if (JSON.stringify(props.targeting) === JSON.stringify(this.props.targeting) && JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
       return;
     }
 
     this.currentDimensions = dimensions;
-
 
     if (this.slot) {
       // remove current slot because dimensions is changed and current slot is old
