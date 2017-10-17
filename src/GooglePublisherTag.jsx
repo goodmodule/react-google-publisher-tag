@@ -190,7 +190,7 @@ export default class GooglePublisherTag extends Component {
     }
 
     // do nothink
-    if (JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
+    if (JSON.stringify(props.targeting) === JSON.stringify(this.props.targeting) && JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
       return;
     }
 
