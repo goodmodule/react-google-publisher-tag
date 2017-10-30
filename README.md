@@ -80,6 +80,7 @@ module.exports = React.createClass({
 | targeting                  | Object           | false     |            |
 | onSlotRenderEnded          | Function         | false     |            |
 | onImpressionViewable       | Function         | false     |            |
+| onSlotVisibilityChanged    | Function         | false     |            |
 | collapseEmptyDiv           | boolean or Array | false     |            |
 
 ## Path
@@ -143,6 +144,10 @@ Pass a function that will be executed when the slot is rendered.
 ## onImpressionViewable
 
 Pass a function that will be executed when the ad is fully rendered.
+
+## onImpressionViewable
+
+Pass a function that will be executed when the on-screen percentage of an ad area changes
 
 ## Credits
 
