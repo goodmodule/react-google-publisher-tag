@@ -58,7 +58,7 @@ function initGooglePublisherTag(props) {
     googletag.cmd = googletag.cmd || [];
   }
 
-  const { onImpressionViewable, onSlotRenderEnded, path } = props;
+  const { onImpressionViewable, onSlotRenderEnded, onSlotVisibilityChanged, path } = props;
 
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
   if (onSlotRenderEnded) {
@@ -79,6 +79,17 @@ function initGooglePublisherTag(props) {
       googletag.pubads().addEventListener('impressionViewable', (event) => {
         if (event.slot.getAdUnitPath() === path) {
           onImpressionViewable(event);
+        }
+      });
+    });
+  }
+
+  // Execute callback whenever the on-screen percentage of an ad slot's area changes
+  if (onSlotVisibilityChanged) {
+    googletag.cmd.push(() => {
+      googletag.pubads().addEventListener('slotVisibilityChanged', (event) => {
+        if (event.slot.getAdUnitPath() === path) {
+          onSlotVisibilityChanged(event);
         }
       });
     });
@@ -124,6 +135,7 @@ export default class GooglePublisherTag extends Component {
     targeting: PropTypes.object,
     resizeDebounce: PropTypes.number.isRequired,
     onSlotRenderEnded: PropTypes.func,
+    onSlotVisibilityChanged: PropTypes.func,
   };
 
   static defaultProps = {
