@@ -145,7 +145,7 @@ Pass a function that will be executed when the slot is rendered.
 
 Pass a function that will be executed when the ad is fully rendered.
 
-## onImpressionViewable
+## onSlotVisibilityChanged
 
 Pass a function that will be executed when the on-screen percentage of an ad area changes
 
