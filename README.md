@@ -117,12 +117,19 @@ It will setup ad size automatically for this component:
  - 336x280: [[336, 280], [300, 250]]
  - 728x90: [[728, 90], [468, 60]]
  - 970x90: [[970, 90], [728, 90], [468, 60]]
+ - OUT_OF_PAGE: none
+
 
 Instead of format you can set your own dimmensions. More details you can find in the [adsense documentation](https://support.google.com/adsense/answer/6002621?hl=sk)
 
 ## Can be lower
 
 You can allow lower ad size automatically. (Default: true)
+
+## out-of-page
+
+Provide format=Format.OUT_OF_PAGE for an Out of Page slot with no dimensions.
+More info: [GPT out-of-page](https://developers.google.com/doubleclick-gpt/reference#googletag.defineOutOfPageSlot)
 
 ## Targeting
 

@@ -183,6 +183,7 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
+    const isOutOfPage = props.format === Format.OUT_OF_PAGE;
     const componentWidth = node.offsetWidth;
     const availableDimensions = prepareDimensions(props.dimensions, props.format, props.canBeLower);
 
@@ -215,7 +216,7 @@ export default class GooglePublisherTag extends Component {
     }
 
     // there is nothink to display
-    if (!dimensions || !dimensions.length) {
+    if (!isOutOfPage && (!dimensions || !dimensions.length)) {
       return;
     }
 
@@ -224,7 +225,9 @@ export default class GooglePublisherTag extends Component {
     node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
-    const slot = googletag.defineSlot(props.path, dimensions, id);
+    const slot = isOutOfPage 
+      ? googletag.defineOutOfPageSlot(props.path, id)
+      : googletag.defineSlot(props.path, dimensions, id);
     this.slot = slot;
 
     // set targeting
