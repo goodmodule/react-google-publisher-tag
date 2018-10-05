@@ -256,11 +256,7 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    if (this.props.id) {
-      googletag.destroySlots([this.slot]);
-    }
-
-    googletag.pubads().clear([this.slot]);
+    googletag.destroySlots([this.slot]);
     this.slot = null;
 
     if (this.node) {
