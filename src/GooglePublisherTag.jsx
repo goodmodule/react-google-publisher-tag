@@ -137,6 +137,7 @@ export default class GooglePublisherTag extends Component {
     resizeDebounce: PropTypes.number.isRequired,
     onSlotRenderEnded: PropTypes.func,
     onSlotVisibilityChanged: PropTypes.func,
+    slotRefresher: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -146,6 +147,7 @@ export default class GooglePublisherTag extends Component {
     enableSingleRequest: false,
     dimensions: null,
     resizeDebounce: 100,
+    slotRefresher: slot => googletag.pubads().refresh([slot]),
   };
 
   componentDidMount() {
@@ -248,7 +250,7 @@ export default class GooglePublisherTag extends Component {
 
     // display new slot
     googletag.display(id);
-    googletag.pubads().refresh([slot]);
+    this.props.slotRefresher(slot);
   }
 
   removeSlot() {
@@ -266,7 +268,7 @@ export default class GooglePublisherTag extends Component {
 
   refreshSlot() {
     if (this.slot) {
-      googletag.pubads().refresh([this.slot]);
+      this.props.slotRefresher(this.slot);
     }
   }
 
