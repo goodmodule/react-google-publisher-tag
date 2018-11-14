@@ -124,6 +124,7 @@ function initGooglePublisherTag(props) {
 export default class GooglePublisherTag extends Component {
   static propTypes = {
     className: PropTypes.string,
+    id: PropTypes.string,
     path: PropTypes.string.isRequired,
     format: PropTypes.string.isRequired,
     responsive: PropTypes.bool.isRequired,
@@ -255,7 +256,7 @@ export default class GooglePublisherTag extends Component {
       return;
     }
 
-    googletag.pubads().clear([this.slot]);
+    googletag.destroySlots([this.slot]);
     this.slot = null;
 
     if (this.node) {
