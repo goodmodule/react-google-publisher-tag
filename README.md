@@ -65,7 +65,7 @@ module.exports = React.createClass({
 
 ## Parameters
 
-| Name                       |     Type         |  Required | Default   |
+| Name                       |     Type         |  Required | Default    |
 |----------------------------|------------------|-----------|------------|
 | path                       | String           | true      |            |
 | responsive                 | Boolean          | true      | true       |
@@ -82,6 +82,7 @@ module.exports = React.createClass({
 | onImpressionViewable       | Function         | false     |            |
 | onSlotVisibilityChanged    | Function         | false     |            |
 | collapseEmptyDiv           | boolean or Array | false     |            |
+| slotRefresher              | Function         | false     |            |
 
 ## Path
 
@@ -148,6 +149,10 @@ Pass a function that will be executed when the ad is fully rendered.
 ## onSlotVisibilityChanged
 
 Pass a function that will be executed when the on-screen percentage of an ad area changes
+
+## slotRefresher
+
+Pass a function that will be used for refreshing slots. By default `googletag.pubads().refresh()` is used.
 
 ## Credits
 
