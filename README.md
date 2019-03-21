@@ -48,21 +48,19 @@ export default class Example extends Component {
 
 ## Parameters
 
-| Name                       |     Type         |  Required | Default   |
-|----------------------------|------------------|-----------|------------|
-| path                       | String           | true      |            |
-| responsive                 | Boolean          | true      | true       |
-| format                     | String           | true      | HORIZONTAL |
-| canBeLower                 | Boolean          | true      | true       |
-| enableSingleRequest        | Boolean          | true      | false      |
-| id                         | String           | false     |            |
-| dimensions                 | Array            | false     |            |
-| className                  | String           | false     |            |
-| targeting                  | Object           | false     |            |
-| onSlotRenderEnded          | Function         | false     |            |
-| onImpressionViewable       | Function         | false     |            |
-| onSlotVisibilityChanged    | Function         | false     |            |
-| collapseEmptyDiv           | boolean or Array | false     |            |
+| Name                       |     Type         |  Required | Default           |
+|----------------------------|------------------|-----------|-------------------|
+| path                       | String           | true      |                   |
+| format                     | String           | false     | MOBILE_HORIZONTAL |
+| canBeLower                 | Boolean          | false     | true              |
+| enableSingleRequest        | Boolean          | false     | false             |
+| id                         | String           | false     |                   |
+| dimensions                 | Array            | false     |                   |
+| targeting                  | Object           | false     |                   |
+| onSlotRenderEnded          | Function         | false     |                   |
+| onImpressionViewable       | Function         | false     |                   |
+| onSlotVisibilityChanged    | Function         | false     |                   |
+| collapseEmpty              | boolean or Array | false     | fals              |
 
 ## Path
 

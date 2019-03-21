@@ -179,17 +179,12 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
       dimensions,
       format,
       canBeLower,
-      responsive,
       targeting,
       collapseEmpty,
     } = props;
 
-    let availableDimensions = prepareDimensions(dimensions, format, canBeLower);
-
-    // filter by available node space
-    if (responsive) {
-      availableDimensions = availableDimensions.filter(dimension => dimension[0] <= width);
-    }
+    const availableDimensions = prepareDimensions(dimensions, format, canBeLower)
+      .filter(dimension => dimension[0] <= width);
 
     // do nothink
     if (JSON.stringify(targeting) === JSON.stringify(this.currentTargeting)
@@ -307,7 +302,7 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
 
 GooglePublisherTag.defaultProps = {
   id: undefined,
-  format: Format.HORIZONTAL,
+  format: Format.MOBILE_HORIZONTAL,
   canBeLower: true,
   enableSingleRequest: false,
   dimensions: undefined,
