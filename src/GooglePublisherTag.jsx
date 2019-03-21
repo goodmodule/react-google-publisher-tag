@@ -1,20 +1,25 @@
 /**
  * https://developers.google.com/doubleclick-gpt/reference
 */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent, type Node } from 'react';
+import Measure from 'react-measure';
+import debounce from 'lodash/debounce';
 import Format from './constants/Format';
 import Dimensions from './constants/Dimensions';
 
-function debounce(fn, delay) {
-  let timer = null;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
+let nextId: number = 1;
+
+function getNextId(): string {
+  nextId += 1;
+
+  return `rgpt-${nextId}`;
 }
 
-function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = true) {
+function prepareDimensions(
+  dimensions,
+  format: string = Format.HORIZONTAL,
+  canBeLower: boolean = true,
+) {
   if (!dimensions || !dimensions.length) {
     return Dimensions[format] || [];
   }
@@ -31,34 +36,50 @@ function prepareDimensions(dimensions, format = Format.HORIZONTAL, canBeLower = 
   return dimensions;
 }
 
-let nextId = 1;
-let googletag = null;
+function loadScript(): void {
+  const js = document.createElement('script');
+  js.async = true;
+  js.defer = true;
+  js.src = 'https://www.googletagservices.com/tag/js/gpt.js';
 
-function getNextId() {
-  nextId += 1;
-
-  return `rgpt-${nextId}`;
+  document.body.appendChild('js');
 }
 
-function loadScript() {
-  const gads = document.createElement('script');
-  gads.async = true;
-  gads.type = 'text/javascript';
-  gads.src = '//www.googletagservices.com/tag/js/gpt.js';
+function initGooglePublisherTag(options?: Object = {}, onInit?: Function): void {
+  const {
+    path,
+    onImpressionViewable,
+    onSlotRenderEnded,
+    onSlotVisibilityChanged,
+  } = options;
 
-  const head = document.getElementsByTagName('head')[0];
-  head.appendChild(gads);
-}
+  const firstTime = !window.googletag;
 
-function initGooglePublisherTag(props) {
-  const exitAfterAddingCommands = !!googletag;
+  const googletag = window.googletag = window.googletag || {};
+  googletag.cmd = googletag.cmd || [];
 
-  if (!googletag) {
-    googletag = window.googletag = window.googletag || {};
-    googletag.cmd = googletag.cmd || [];
+  if (firstTime) {
+    googletag.cmd.push(() => {
+      if (options.enableSingleRequest) {
+        // Infinite scroll requires SRA
+        googletag.pubads().enableSingleRequest();
+      }
+
+      // add support for async loading
+      googletag.pubads().enableAsyncRendering();
+
+      // collapse div without ad
+      // googletag.pubads().collapseEmptyDivs();
+
+      // load ad with slot refresh
+      googletag.pubads().disableInitialLoad();
+
+      // enable google publisher tag
+      googletag.enableServices();
+    });
+
+    loadScript();
   }
-
-  const { onImpressionViewable, onSlotRenderEnded, onSlotVisibilityChanged, path } = props;
 
   // Execute callback when the slot is visible in DOM (thrown before 'impressionViewable' )
   if (onSlotRenderEnded) {
@@ -95,68 +116,66 @@ function initGooglePublisherTag(props) {
     });
   }
 
-  if (exitAfterAddingCommands) {
-    return;
+  if (onInit) {
+    googletag.cmd.push(() => {
+      onInit(googletag);
+    });
   }
-
-  googletag.cmd.push(() => {
-    if (props.enableSingleRequest) {
-      // Infinite scroll requires SRA
-      googletag.pubads().enableSingleRequest();
-    }
-
-    // add support for async loading
-    googletag.pubads().enableAsyncRendering();
-
-    // collapse div without ad
-    googletag.pubads().collapseEmptyDivs();
-
-    // load ad with slot refresh
-    googletag.pubads().disableInitialLoad();
-
-    // enable google publisher tag
-    googletag.enableServices();
-  });
-
-  loadScript();
 }
 
-export default class GooglePublisherTag extends Component {
-  static propTypes = {
-    className: PropTypes.string,
-    id: PropTypes.string,
-    path: PropTypes.string.isRequired,
-    format: PropTypes.string.isRequired,
-    responsive: PropTypes.bool.isRequired,
-    canBeLower: PropTypes.bool.isRequired, // can be ad lower than original size,
-    enableSingleRequest: PropTypes.bool.isRequired,
-    dimensions: PropTypes.array,  // [[300, 600], [160, 600]]
-    minWindowWidth: PropTypes.number,
-    maxWindowWidth: PropTypes.number,
-    targeting: PropTypes.object,
-    resizeDebounce: PropTypes.number.isRequired,
-    onSlotRenderEnded: PropTypes.func,
-    onSlotVisibilityChanged: PropTypes.func,
-  };
+type Props = {
+  id?: string,
+  path: string,
+  format?: string,
+  canBeLower?: boolean, // can be ad lower than original size,
+  enableSingleRequest?: boolean,
+  dimensions?: string[], // [[300, 600], [160, 600]]
+  targeting?: Object,
+  resizeDebounce?: number,
+  onSlotRenderEnded?: Function,
+  onSlotVisibilityChanged?: Function,
+  onImpressionViewable?: Function,
+  collapseEmpty?: boolean,
+};
 
-  static defaultProps = {
-    format: Format.HORIZONTAL,
-    responsive: true,
-    canBeLower: true,
-    enableSingleRequest: false,
-    dimensions: null,
-    resizeDebounce: 100,
-  };
+type State = {
+  bounds?: {
+    width: number,
+    height: number,
+  }
+};
+
+export default class GooglePublisherTag extends PureComponent<Props, State> {
+  googletag: Object;
+  node: Node;
+
+  state = {};
+
+  handleResize = debounce((contentRect) => {
+    this.setState({
+      bounds: contentRect.bounds,
+    }, () => {
+      this.update(this.props);
+    });
+  }, this.props.resizeDebounce)
 
   componentDidMount() {
-    initGooglePublisherTag(this.props);
+    const {
+      path,
+      onImpressionViewable,
+      onSlotRenderEnded,
+      onSlotVisibilityChanged,
+    } = this.props;
 
-    if (this.props.responsive) {
-      window.addEventListener('resize', this.handleResize);
-    }
+    const options = {
+      path,
+      onImpressionViewable,
+      onSlotRenderEnded,
+      onSlotVisibilityChanged,
+    };
 
-    googletag.cmd.push(() => {
-      this.initialized = true;
+    initGooglePublisherTag(options, (googletag: Object) => {
+      this.googletag = googletag;
       this.update(this.props);
     });
   }
@@ -166,66 +185,91 @@ export default class GooglePublisherTag extends Component {
   }
 
   componentWillUnmount() {
-    // TODO sometimes can props changed
-    if (this.props.responsive) {
-      window.removeEventListener('resize', this.handleResize);
-    }
-
     this.removeSlot();
   }
 
-  update(props) {
-    if (!this.initialized) {
+  removeSlot() {
+    const { slot, googletag, node } = this;
+    if (slot && googletag) {
+      googletag.destroySlots([slot]);
+      this.slot = null;
+
+      if (node) {
+        node.innerHTML = null;
+      }
+    }
+  }
+
+  refreshSlot() {
+    const { slot, googletag } = this;
+    if (slot && googletag) {
+      googletag.pubads().refresh([slot]);
+    }
+  }
+
+  handleNode = (node: Node, measureRef: Function) => {
+    this.node = node;
+
+    measureRef(node);
+    this.update(this.props);
+  }
+
+  update(props: Props) {
+    const {
+      id = getNextId(),
+      node,
+      googletag,
+      state: {
+        bounds,
+      },
+      props: {
+        targeting: oldTargering,
+      },
+    } = this;
+
+    if (!googletag || !node || !bounds) {
       return;
     }
 
-    const { node } = this;
-    if (!node) {
-      return;
-    }
+    const { width } = bounds;
 
-    const componentWidth = node.offsetWidth;
-    const availableDimensions = prepareDimensions(props.dimensions, props.format, props.canBeLower);
+    const {
+      dimensions,
+      format,
+      canBeLower,
+      responsive,
+      targeting,
+      collapseEmpty,
+    } = props;
+
+    let availableDimensions = prepareDimensions(dimensions, format, canBeLower);
 
     // filter by available node space
-    let dimensions = props.responsive
-      ? availableDimensions.filter(dimension => dimension[0] <= componentWidth)
-      : availableDimensions;
-
-    // filter by min and max width
-    const windowWidth = window.innerWidth;
-    const { minWindowWidth, maxWindowWidth, targeting, collapseEmptyDiv } = props;
-
-    if (minWindowWidth !== undefined && windowWidth < minWindowWidth) {
-      dimensions = [];
-    } else if (maxWindowWidth !== undefined && windowWidth > maxWindowWidth) {
-      dimensions = [];
+    if (responsive) {
+      availableDimensions = availableDimensions.filter(dimension => dimension[0] <= width);
     }
 
     // do nothink
-    if (JSON.stringify(props.targeting) === JSON.stringify(this.props.targeting) && JSON.stringify(dimensions) === JSON.stringify(this.currentDimensions)) {
+    if (JSON.stringify(targeting) === JSON.stringify(oldTargering)
+      && JSON.stringify(availableDimensions) === JSON.stringify(this.currentDimensions)) {
       return;
     }
 
-    this.currentDimensions = dimensions;
+    this.currentDimensions = availableDimensions;
 
-
-    if (this.slot) {
-      // remove current slot because dimensions is changed and current slot is old
-      this.removeSlot();
-    }
+    // remove current slot because dimensions is changed and current slot is old
+    this.removeSlot();
 
     // there is nothink to display
-    if (!dimensions || !dimensions.length) {
+    if (!availableDimensions || !availableDimensions.length) {
       return;
     }
 
     // prepare new node content
-    const id = props.id || getNextId();
     node.innerHTML = `<div id="${id}"></div>`;
 
     // prepare new slot
-    const slot = googletag.defineSlot(props.path, dimensions, id);
+    const slot = googletag.defineSlot(props.path, availableDimensions, id);
     this.slot = slot;
 
     // set targeting
@@ -236,10 +280,10 @@ export default class GooglePublisherTag extends Component {
     }
 
     // set collapsing
-    if (typeof collapseEmptyDiv !== 'undefined') {
-      const args = Array.isArray(collapseEmptyDiv)
-        ? collapseEmptyDiv
-        : [collapseEmptyDiv];
+    if (typeof collapseEmpty !== 'undefined') {
+      const args = Array.isArray(collapseEmpty)
+        ? collapseEmpty
+        : [collapseEmpty];
 
       slot.setCollapseEmptyDiv(...args);
     }
@@ -251,45 +295,29 @@ export default class GooglePublisherTag extends Component {
     googletag.pubads().refresh([slot]);
   }
 
-  removeSlot() {
-    if (!this.slot) {
-      return;
-    }
-
-    googletag.destroySlots([this.slot]);
-    this.slot = null;
-
-    if (this.node) {
-      this.node.innerHTML = null;
-    }
-  }
-
-  refreshSlot() {
-    if (this.slot) {
-      googletag.pubads().refresh([this.slot]);
-    }
-  }
-
-  handleResize = () => {
-    const { resizeDebounce } = this.props;
-
-    if (!this.resizeDebounce) {
-      this.resizeDebounce = debounce(
-        () => this.update(this.props),
-        resizeDebounce,
-      );
-    }
-
-    this.resizeDebounce();
-  }
-
-  handleNode = (node) => {
-    this.node = node;
-  }
-
   render() {
     return (
-      <div className={this.props.className} ref={this.handleNode} />
+      <Measure onResize={this.handleResize} bounds>
+        {({ measureRef }) => (
+          <div
+            ref={node => this.handleNode(node, measureRef)}
+          />
+        )}
+      </Measure>
     );
   }
 }
+
+GooglePublisherTag.defaultProps = {
+  id: undefined,
+  format: Format.HORIZONTAL,
+  canBeLower: true,
+  enableSingleRequest: false,
+  dimensions: undefined,
+  targeting: undefined,
+  resizeDebounce: 100,
+  onSlotRenderEnded: undefined,
+  onSlotVisibilityChanged: undefined,
+  onImpressionViewable: undefined,
+  collapseEmpty: false,
+};

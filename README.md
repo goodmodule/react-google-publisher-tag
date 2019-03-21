@@ -32,35 +32,18 @@ npm install react-google-publisher-tag
 ```js
 //ES6
 import React, { Component } from 'react';
-import AD from 'react-google-publisher-tag';
+import Ad from 'react-google-publisher-tag';
 
 export default class Example extends Component {
   render() {
     return (
       <div id="application">
-        <AD path="/network-code/ad-code" />
+        <Ad path="/network-code/ad-code" />
         <RouteHandler />
       </div>
     );
   }
 }
-```
-
-```js
-//ES5
-var React = require('react');
-var AD = require('react-google-publisher-tag').default;
-
-module.exports = React.createClass({
-  render: function() {
-    return (
-      <div id="application">
-        <AD path="/network-code/ad-code" />
-        <RouteHandler />
-      </div>
-    );
-  }
-});
 ```
 
 ## Parameters
@@ -74,8 +57,6 @@ module.exports = React.createClass({
 | enableSingleRequest        | Boolean          | true      | false      |
 | id                         | String           | false     |            |
 | dimensions                 | Array            | false     |            |
-| minWindowWidth             | Integer          | false     |            |
-| maxWindowWidth             | Integer          | false     |            |
 | className                  | String           | false     |            |
 | targeting                  | Object           | false     |            |
 | onSlotRenderEnded          | Function         | false     |            |
@@ -108,15 +89,18 @@ Identifies the ad unit in the associated ad tag. Ad unit codes can be up to 100 
 ## Formats
 
 It will setup ad size automatically for this component:
- - HORIZONTAL [[970, 90], [728, 90], [468, 60], [234, 60]]
- - RECTANGLE [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]]
- - VERTICAL [[300, 600], [160, 600], [120, 600], [120, 240]]
- - MOBILE: [[320, 50]],
- - MOBILE_BIG: [[320, 100], [320, 50]],
- - 300x600: [[300, 600], [160, 600]]
- - 336x280: [[336, 280], [300, 250]]
- - 728x90: [[728, 90], [468, 60]]
- - 970x90: [[970, 90], [728, 90], [468, 60]]
+  - [Format.HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [234, 60]],
+  - [Format.RECTANGLE]: [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]],
+  - [Format.VERTICAL]: [[300, 600], [160, 600], [120, 600], [120, 240]],
+  - [Format.MOBILE]: [[320, 50]],
+  - [Format.MOBILE_BIG]: [[320, 100], [320, 50]],
+  - [Format.MOBILE_HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [320, 100], [320, 50], [234, 60]],
+  - [Format.PORTRET]: [[300, 1050]],
+  - [Format.BILBORD]: [[970, 250]],
+  - '300x600': [[300, 600], [160, 600]],
+  - '336x280': [[336, 280], [300, 250]],
+  - '728x90': [[728, 90], [468, 60]],
+  - '970x90': [[970, 90], [728, 90], [468, 60]],
 
 Instead of format you can set your own dimmensions. More details you can find in the [adsense documentation](https://support.google.com/adsense/answer/6002621?hl=sk)
 

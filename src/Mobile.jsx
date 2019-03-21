@@ -1,9 +1,13 @@
+// @flow
 import React from 'react';
-import PropTypes from 'prop-types';
 import Ad from './GooglePublisherTag';
 import Format from './constants/Format';
 
-export default function Mobile(props) {
+type Props = {
+  small?: boolean,
+};
+
+export default function Mobile(props: Props) {
   const {
     small,
     ...rest
@@ -17,10 +21,6 @@ export default function Mobile(props) {
   );
 }
 
-Mobile.propTypes = {
-  small: PropTypes.bool,
-};
-
 Mobile.defaultProps = {
-  small: undefined,
+  small: false,
 };

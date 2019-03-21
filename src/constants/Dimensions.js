@@ -1,3 +1,4 @@
+// @flow
 import Format from './Format';
 
 export default {
