@@ -151,12 +151,91 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
 
   state = {};
 
-  handleResize = debounce((contentRect) => {
+  handleResize = (contentRect) => {
     this.setState({
       bounds: contentRect.bounds,
     }, () => {
       this.update(this.props);
     });
+  }
+
+  update = debounce((props: Props) => {
+    const {
+      id = getNextId(),
+      node,
+      googletag,
+      state: {
+        bounds,
+      },
+    } = this;
+
+    if (!googletag || !node || !bounds) {
+      return;
+    }
+
+    const { width } = bounds;
+
+    const {
+      dimensions,
+      format,
+      canBeLower,
+      responsive,
+      targeting,
+      collapseEmpty,
+    } = props;
+
+    let availableDimensions = prepareDimensions(dimensions, format, canBeLower);
+
+    // filter by available node space
+    if (responsive) {
+      availableDimensions = availableDimensions.filter(dimension => dimension[0] <= width);
+    }
+
+    // do nothink
+    if (JSON.stringify(targeting) === JSON.stringify(this.currentTargeting)
+      && JSON.stringify(availableDimensions) === JSON.stringify(this.currentDimensions)) {
+      return;
+    }
+
+    this.currentTargeting = targeting;
+    this.currentDimensions = availableDimensions;
+
+    // remove current slot because dimensions is changed and current slot is old
+    this.removeSlot();
+
+    // there is nothink to display
+    if (!availableDimensions || !availableDimensions.length) {
+      return;
+    }
+
+    // prepare new node content
+    node.innerHTML = `<div id="${id}"></div>`;
+
+    // prepare new slot
+    const slot = googletag.defineSlot(props.path, availableDimensions, id);
+    this.slot = slot;
+
+    // set targeting
+    if (targeting) {
+      Object.keys(targeting).forEach((key) => {
+        slot.setTargeting(key, targeting[key]);
+      });
+    }
+
+    // set collapsing
+    if (typeof collapseEmpty !== 'undefined') {
+      const args = Array.isArray(collapseEmpty)
+        ? collapseEmpty
+        : [collapseEmpty];
+
+      slot.setCollapseEmptyDiv(...args);
+    }
+
+    slot.addService(googletag.pubads());
+
+    // display new slot
+    googletag.display(id);
+    googletag.pubads().refresh([slot]);
   }, this.props.resizeDebounce)
 
   componentDidMount() {
@@ -207,101 +286,19 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
     }
   }
 
-  handleNode = (node: Node, measureRef: Function) => {
+  handleNode = (node: Node) => {
     this.node = node;
 
-    measureRef(node);
     this.update(this.props);
-  }
-
-  update(props: Props) {
-    const {
-      id = getNextId(),
-      node,
-      googletag,
-      state: {
-        bounds,
-      },
-      props: {
-        targeting: oldTargering,
-      },
-    } = this;
-
-    if (!googletag || !node || !bounds) {
-      return;
-    }
-
-    const { width } = bounds;
-
-    const {
-      dimensions,
-      format,
-      canBeLower,
-      responsive,
-      targeting,
-      collapseEmpty,
-    } = props;
-
-    let availableDimensions = prepareDimensions(dimensions, format, canBeLower);
-
-    // filter by available node space
-    if (responsive) {
-      availableDimensions = availableDimensions.filter(dimension => dimension[0] <= width);
-    }
-
-    // do nothink
-    if (JSON.stringify(targeting) === JSON.stringify(oldTargering)
-      && JSON.stringify(availableDimensions) === JSON.stringify(this.currentDimensions)) {
-      return;
-    }
-
-    this.currentDimensions = availableDimensions;
-
-    // remove current slot because dimensions is changed and current slot is old
-    this.removeSlot();
-
-    // there is nothink to display
-    if (!availableDimensions || !availableDimensions.length) {
-      return;
-    }
-
-    // prepare new node content
-    node.innerHTML = `<div id="${id}"></div>`;
-
-    // prepare new slot
-    const slot = googletag.defineSlot(props.path, availableDimensions, id);
-    this.slot = slot;
-
-    // set targeting
-    if (targeting) {
-      Object.keys(targeting).forEach((key) => {
-        slot.setTargeting(key, targeting[key]);
-      });
-    }
-
-    // set collapsing
-    if (typeof collapseEmpty !== 'undefined') {
-      const args = Array.isArray(collapseEmpty)
-        ? collapseEmpty
-        : [collapseEmpty];
-
-      slot.setCollapseEmptyDiv(...args);
-    }
-
-    slot.addService(googletag.pubads());
-
-    // display new slot
-    googletag.display(id);
-    googletag.pubads().refresh([slot]);
   }
 
   render() {
     return (
       <Measure onResize={this.handleResize} bounds>
         {({ measureRef }) => (
-          <div
-            ref={node => this.handleNode(node, measureRef)}
-          />
+          <div ref={measureRef}>
+            <div ref={this.handleNode} />
+          </div>
         )}
       </Measure>
     );
