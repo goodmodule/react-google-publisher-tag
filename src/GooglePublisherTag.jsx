@@ -42,7 +42,7 @@ function loadScript(): void {
   js.defer = true;
   js.src = 'https://www.googletagservices.com/tag/js/gpt.js';
 
-  document.body.appendChild('js');
+  document.body.appendChild(js);
 }
 
 function initGooglePublisherTag(options?: Object = {}, onInit?: Function): void {
