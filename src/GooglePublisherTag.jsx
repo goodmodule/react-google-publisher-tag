@@ -211,7 +211,7 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
     node.innerHTML = `<div id="${adId}"></div>`;
 
     // prepare new slot
-    const slot = googletag.defineSlot(props.path, availableDimensions, id);
+    const slot = googletag.defineSlot(props.path, availableDimensions, adId);
     this.slot = slot;
 
     // set targeting
@@ -233,7 +233,7 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
     slot.addService(googletag.pubads());
 
     // display new slot
-    googletag.display(id);
+    googletag.display(adId);
     googletag.pubads().refresh([slot]);
   }, this.props.resizeDebounce)
 
