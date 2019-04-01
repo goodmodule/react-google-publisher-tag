@@ -10,4 +10,5 @@ export default keymirror({
   MOBILE_HORIZONTAL: null,
   PORTRET: null,
   BILBORD: null,
+  FLUID: null,
 });

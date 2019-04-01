@@ -2,6 +2,7 @@
 import Format from './Format';
 
 export default {
+  [Format.FLUID]: ['fluid'],
   [Format.HORIZONTAL]: [[970, 90], [728, 90], [468, 60], [234, 60]],
   [Format.RECTANGLE]: [[336, 280], [300, 250], [250, 250], [200, 200], [180, 150], [125, 125]],
   [Format.VERTICAL]: [[300, 600], [160, 600], [120, 600], [120, 240]],

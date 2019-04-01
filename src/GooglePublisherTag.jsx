@@ -65,9 +65,6 @@ function initGooglePublisherTag(options?: Object = {}, onInit?: Function): void 
         googletag.pubads().enableSingleRequest();
       }
 
-      // add support for async loading
-      googletag.pubads().enableAsyncRendering();
-
       // collapse div without ad
       // googletag.pubads().collapseEmptyDivs();
 
@@ -136,6 +133,7 @@ type Props = {
   onSlotVisibilityChanged?: Function,
   onImpressionViewable?: Function,
   collapseEmpty?: boolean,
+  fluid?: boolean,
 };
 
 type State = {
@@ -161,7 +159,7 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
 
   update = debounce((props: Props) => {
     const {
-      id = getNextId(),
+      id,
       node,
       googletag,
       state: {
@@ -181,10 +179,15 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
       canBeLower,
       targeting,
       collapseEmpty,
+      fluid,
     } = props;
 
     const availableDimensions = prepareDimensions(dimensions, format, canBeLower)
-      .filter(dimension => dimension[0] <= width);
+      .filter(dimension => dimension === 'fluid' || dimension[0] <= width);
+
+    if (fluid && !availableDimensions.find(dimension => dimension === 'fluid')) {
+      availableDimensions.push('fluid');
+    }
 
     // do nothink
     if (JSON.stringify(targeting) === JSON.stringify(this.currentTargeting)
@@ -204,7 +207,8 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
     }
 
     // prepare new node content
-    node.innerHTML = `<div id="${id}"></div>`;
+    const adId = id || getNextId();
+    node.innerHTML = `<div id="${adId}"></div>`;
 
     // prepare new slot
     const slot = googletag.defineSlot(props.path, availableDimensions, id);
@@ -312,4 +316,5 @@ GooglePublisherTag.defaultProps = {
   onSlotVisibilityChanged: undefined,
   onImpressionViewable: undefined,
   collapseEmpty: false,
+  fluid: false,
 };
