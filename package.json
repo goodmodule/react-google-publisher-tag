@@ -32,7 +32,7 @@
     "node": ">= 6.0.0"
   },
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm run snyk-protect; npm run build",
     "test": "jest ./src/",
     "test:coverage": "jest --coverage ./src/",
     "test:watch": "jest --watch ./src/",
@@ -40,7 +40,8 @@
     "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir ./module --source-maps --copy-files",
     "build-node": "babel ./src --out-dir ./dist --source-maps --copy-files",
     "build": "npm run build-node && npm run build-browser && npm run build-module",
-    "eslint": "node ./node_modules/eslint/bin/eslint.js --ext .js,.jsx ./src"
+    "eslint": "node ./node_modules/eslint/bin/eslint.js --ext .js,.jsx ./src",
+    "snyk-protect": "snyk protect"
   },
   "jest": {
     "setupFiles": [
@@ -51,7 +52,8 @@
     "@babel/runtime": "^7.4.2",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.11",
-    "react-measure": "^2.2.4"
+    "react-measure": "^2.2.4",
+    "snyk": "^1.192.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -95,5 +97,6 @@
   },
   "peerDependencies": {
     "react": "16.x"
-  }
+  },
+  "snyk": true
 }
