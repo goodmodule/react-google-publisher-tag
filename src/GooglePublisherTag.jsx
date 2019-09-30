@@ -258,7 +258,7 @@ export default class GooglePublisherTag extends PureComponent<Props, State> {
     });
   }
 
-  componentWillReceiveProps(props) {
+  UNSAFE_componentWillReceiveProps(props) {
     this.update(props);
   }
 
